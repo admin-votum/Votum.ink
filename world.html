@@ -492,7 +492,7 @@ header {
 
 <div class="main">
   <div class="map-panel">
-    <div id="map-container" style="filter:blur(2px) brightness(0.75);pointer-events:none">
+    <div id="map-container" style="filter:none;pointer-events:all">
       <svg id="world-map" viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
 
@@ -1094,19 +1094,10 @@ async function loadWorldMap() {
   // Done — graticule, ocean labels and ships all added above
 }
 
-// PRO LOCK — check if user has Pro access
-// Later: check Supabase session/subscription status
-const isPro = localStorage.getItem('votum-pro') === 'true' ||
-              new URLSearchParams(window.location.search).get('pro') === 'true';
-
-const proLock = document.getElementById('pro-lock');
-if (isPro) {
-  proLock.style.display = 'none';
-} else {
-  // Blur/dim map when locked
-  document.getElementById('map-container').style.filter = 'none';
-  document.getElementById('map-container').style.pointerEvents = 'none';
-}
+// PRO LOCK — disabled during development
+document.getElementById('pro-lock').style.display = 'none';
+document.getElementById('map-container').style.filter = 'none';
+document.getElementById('map-container').style.pointerEvents = 'all';
 
 // DARK MODE
 const toggle = document.getElementById('theme-toggle');
