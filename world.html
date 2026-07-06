@@ -975,6 +975,203 @@ async function loadWorldMap() {
 
     svg.appendChild(el);
   });
+
+  // SUBMARINE CABLES — major transoceanic internet cables
+  // Coordinates in [lon, lat] projected to SVG x,y
+  const CABLES = [
+    // Transatlantic
+    {name:"AEConnect", points:[[-74,40.7],[-8,53.3],[-6,53.5]], color:"#7A9FBF"},
+    {name:"TAT-14", points:[[-74,40],[-5,48],[-1,51]], color:"#7A9FBF"},
+    {name:"FLAG Atlantic", points:[[-73.9,40.6],[-6,50],[0.1,51.5],[12.5,55.7]], color:"#7A9FBF"},
+    {name:"SAT3/WASC", points:[[-13.7,9.5],[0,5],[-0.2,5.6],[13.5,-4.3],[32.5,-25.9],[18.4,-33.9]], color:"#7A9FBF"},
+    // Transpacific
+    {name:"FASTER", points:[[-122.4,37.8],[-157.8,21.3],[135.5,34.7],[139.7,35.7]], color:"#7A9FBF"},
+    {name:"NCP", points:[[-118.2,33.7],[-157.8,21.3],[141.3,42.4]], color:"#7A9FBF"},
+    {name:"AAG", points:[[-118,33.9],[-157.8,21.3],[114.1,22.3],[103.8,1.3]], color:"#7A9FBF"},
+    // Asia-Europe (SEA-ME-WE)
+    {name:"SEA-ME-WE 4", points:[[103.8,1.3],[79.8,6.9],[72.8,18.9],[43.6,3.4],[32.5,29.9],[12.5,43.5],[2.35,48.8]], color:"#7A9FBF"},
+    {name:"SEA-ME-WE 5", points:[[103.8,1.3],[80.6,7.2],[73,19],[44,11.5],[36.8,11],[32.9,30],[9.9,38.1],[2.35,48.8]], color:"#7A9FBF"},
+    // Indian Ocean
+    {name:"SAFE", points:[[18.4,-33.9],[57.5,-20.2],[73,4],[80.2,6.9],[103.8,1.3]], color:"#7A9FBF"},
+    // Americas
+    {name:"ARCOS", points:[[-80.2,25.8],[-77,25],[-66.1,18.5],[-64.7,17.7],[-61.5,10.6],[-79.5,8.9]], color:"#7A9FBF"},
+    // Australia
+    {name:"Southern Cross", points:[[-122.4,37.8],[-157.8,21.3],[-171,13.8],[174.8,-36.8],[151.2,-33.9]], color:"#7A9FBF"},
+  ];
+
+  // SHIPPING ROUTES — major global trade lanes
+  const SHIPPING = [
+    // North Atlantic
+    {name:"North Atlantic", points:[[-74,40.7],[-40,45],[-10,50],[-5,48],[0,51]], color:"#C4A882"},
+    // South Atlantic
+    {name:"South Atlantic", points:[[-43.2,-22.9],[-15,-10],[0,-5],[17.4,-34],[18.4,-33.9]], color:"#C4A882"},
+    // Europe-Asia via Suez
+    {name:"Europe-Asia Suez", points:[[4.9,52.4],[2.3,51.5],[-5,36],[12,37],[32,31],[32.5,29.9],[43.6,12.6],[45,11],[51,12],[57,21],[58,22],[65,25],[72.8,18.9],[77,8],[80.3,6],[103.8,1.3]], color:"#C4A882"},
+    // Cape Route (around Africa)
+    {name:"Cape of Good Hope", points:[[4.9,52.4],[-8,38],[-17,-8],[18.4,-33.9],[57.5,-20.2],[73,4],[80,6],[103.8,1.3]], color:"#C4A882"},
+    // Transpacific North
+    {name:"Transpacific North", points:[[-122.4,37.8],[-150,45],[-170,48],[170,45],[141,35.7],[135,34.7],[121.5,31.2],[114.1,22.3],[103.8,1.3]], color:"#C4A882"},
+    // Transpacific South
+    {name:"Transpacific South", points:[[-77.1,-12],[-100,-10],[-130,-10],[-170,-15],[170,-20],[153,-27],[151.2,-33.9]], color:"#C4A882"},
+    // Indian Ocean
+    {name:"Indian Ocean", points:[[103.8,1.3],[80.3,6],[73,4],[57.5,-20.2],[44,11.5],[43.6,12.6],[45,11]], color:"#C4A882"},
+    // Persian Gulf
+    {name:"Persian Gulf", points:[[56.4,24.5],[55,25],[52,26],[50,26.2],[48.5,29.4],[47.9,29.3]], color:"#C4A882"},
+    // South China Sea
+    {name:"South China Sea", points:[[103.8,1.3],[108,10],[114.1,22.3],[121.5,31.2]], color:"#C4A882"},
+    // Panama Canal route
+    {name:"Panama Canal", points:[[-74,40.7],[-65,30],[-60,15],[-79.5,8.9],[-90,13],[-95,20],[-97,26],[-90,29],[-88,30]], color:"#C4A882"},
+    // Australia-Asia
+    {name:"Australia-Asia", points:[[151.2,-33.9],[141,-11],[130.8,-12.5],[114.1,-22],[103.8,1.3]], color:"#C4A882"},
+    // East Africa
+    {name:"East Africa", points:[[43.6,3.4],[41.9,12.1],[44,11.5],[50,11.5],[55,23],[56.4,24.5]], color:"#C4A882"},
+    // Mediterranean
+    {name:"Mediterranean", points:[[2.3,48.8],[2.3,43.5],[12.5,43.5],[15.3,37.1],[23,37.9],[26,38],[28,41],[32.5,31],[32.9,30]], color:"#C4A882"},
+  ];
+
+  function projectPoint(lon, lat) {
+    const p = projection([lon, lat]);
+    return p;
+  }
+
+  function drawRoute(points, color, opacity, strokeWidth, dasharray) {
+    if (points.length < 2) return;
+    const projected = points.map(([lon, lat]) => projectPoint(lon, lat)).filter(p => p);
+    if (projected.length < 2) return;
+
+    const d = projected.map((p, i) => `${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', strokeWidth);
+    path.setAttribute('stroke-opacity', opacity);
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    if (dasharray) path.setAttribute('stroke-dasharray', dasharray);
+    return path;
+  }
+
+  // Draw cables first (below shipping, below countries)
+  // Insert before first country path
+  const cableGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  cableGroup.setAttribute('id', 'cables');
+
+  CABLES.forEach(cable => {
+    const el = drawRoute(cable.points, '#6A9FBF', 0.35, 0.8, '3,4');
+    if (el) cableGroup.appendChild(el);
+  });
+
+  // Draw shipping routes
+  const shippingGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  shippingGroup.setAttribute('id', 'shipping');
+
+  SHIPPING.forEach(route => {
+    // Draw shadow/glow first
+    const shadow = drawRoute(route.points, '#C4A882', 0.08, 3);
+    if (shadow) shippingGroup.appendChild(shadow);
+    // Then the route itself
+    const el = drawRoute(route.points, '#C4A882', 0.45, 1.2);
+    if (el) shippingGroup.appendChild(el);
+  });
+
+  // Insert cables and shipping AFTER ocean, BEFORE countries
+  // Find first country path and insert before it
+  const firstCountry = svg.querySelector('.country-path');
+  if (firstCountry) {
+    svg.insertBefore(shippingGroup, firstCountry);
+    svg.insertBefore(cableGroup, firstCountry);
+  } else {
+    svg.appendChild(cableGroup);
+    svg.appendChild(shippingGroup);
+  }
+
+  // Add animated ships on major routes
+  const SHIP_ROUTES = [
+    [[-74,40.7],[-40,45],[-10,50],[-5,48],[0,51]],
+    [[103.8,1.3],[80.3,6],[57.5,-20.2],[18.4,-33.9]],
+    [[-122.4,37.8],[-150,45],[-170,48],[170,45],[135,34.7],[103.8,1.3]],
+    [[4.9,52.4],[2.3,51.5],[-5,36],[32.9,30],[43.6,12.6],[72.8,18.9],[103.8,1.3]],
+  ];
+
+  SHIP_ROUTES.forEach((route, ri) => {
+    const projected = route.map(([lon, lat]) => projectPoint(lon, lat)).filter(p => p);
+    if (projected.length < 2) return;
+
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('r', '2');
+    dot.setAttribute('fill', '#E8D5A3');
+    dot.setAttribute('opacity', '0.8');
+    svg.appendChild(dot);
+
+    // Calculate total path length for animation
+    let totalLen = 0;
+    const segments = [];
+    for (let i = 1; i < projected.length; i++) {
+      const dx = projected[i][0] - projected[i-1][0];
+      const dy = projected[i][1] - projected[i-1][1];
+      const len = Math.sqrt(dx*dx + dy*dy);
+      segments.push({from: projected[i-1], to: projected[i], len});
+      totalLen += len;
+    }
+
+    const duration = 18000 + ri * 4000;
+    const offset = ri * (duration / SHIP_ROUTES.length);
+    let startTime = null;
+
+    function animateShip(ts) {
+      if (!startTime) startTime = ts - offset;
+      const elapsed = ((ts - startTime) % duration) / duration;
+      const targetLen = elapsed * totalLen;
+
+      let accumulated = 0;
+      for (const seg of segments) {
+        if (accumulated + seg.len >= targetLen) {
+          const t = (targetLen - accumulated) / seg.len;
+          const x = seg.from[0] + (seg.to[0] - seg.from[0]) * t;
+          const y = seg.from[1] + (seg.to[1] - seg.from[1]) * t;
+          dot.setAttribute('cx', x.toFixed(1));
+          dot.setAttribute('cy', y.toFixed(1));
+          break;
+        }
+        accumulated += seg.len;
+      }
+      requestAnimationFrame(animateShip);
+    }
+    requestAnimationFrame(animateShip);
+  });
+
+  // MAP LEGEND
+  const legendG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  legendG.setAttribute('transform', 'translate(10, 470)');
+
+  const legendItems = [
+    {color:'#C4A882', dash:'', label:'Shipping routes', opacity:0.7},
+    {color:'#6A9FBF', dash:'3,4', label:'Submarine cables', opacity:0.7},
+  ];
+
+  legendItems.forEach((item, i) => {
+    const x = i * 160;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x); line.setAttribute('y1', 6);
+    line.setAttribute('x2', x+24); line.setAttribute('y2', 6);
+    line.setAttribute('stroke', item.color);
+    line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('stroke-opacity', item.opacity);
+    if (item.dash) line.setAttribute('stroke-dasharray', item.dash);
+    legendG.appendChild(line);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x+30); text.setAttribute('y', 10);
+    text.setAttribute('font-size', '9');
+    text.setAttribute('font-family', 'Inter, sans-serif');
+    text.setAttribute('fill', 'var(--muted)');
+    text.setAttribute('letter-spacing', '0.04em');
+    text.textContent = item.label;
+    legendG.appendChild(text);
+  });
+
+  svg.appendChild(legendG);
 }
 
 // PRO LOCK — check if user has Pro access
