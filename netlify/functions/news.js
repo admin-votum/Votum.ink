@@ -112,9 +112,9 @@ function isSpam(article) {
   const title = (article.title || '').toLowerCase();
   const source = (article.source || '').toLowerCase();
 
-  // Hard cutoff — articles older than 10 days are stale
+  // Hard cutoff — articles older than 21 days are stale
   const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
-  if (ageHours > 240) return true;
+  if (ageHours > 504) return true;
 
   // Known low quality sources — explicit block list
   const blocked = ['hotair','wnd','arcamax','dailysignal','daily signal',

@@ -474,8 +474,9 @@ header {
   overflow-y: auto;
   padding: 14px 28px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-auto-rows: auto;
+  gap: 12px;
   align-content: start;
 }
 
@@ -487,12 +488,13 @@ header {
   background: var(--surface);
   border: 0.5px solid var(--border2);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 16px 18px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
+  min-height: 110px;
 }
 
 .news-card:hover { background: var(--surface2); }
@@ -513,7 +515,7 @@ header {
 .pip-right { background: #B94040; }
 
 .news-source-name { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.news-headline { font-size: 13px; line-height: 1.5; color: var(--text); }
+.news-headline { font-size: 14px; line-height: 1.5; color: var(--text); }
 .news-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
 .empty-state {
