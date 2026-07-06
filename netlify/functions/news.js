@@ -110,10 +110,36 @@ function rankScore(article) {
 function isSpam(article) {
   const reach = getReach(article.source);
   const title = (article.title || '').toLowerCase();
-  // Filter out very low reach unknown sources and clickbait patterns
-  if (reach < 2) return true;
-  if (!article.title || article.title.length < 20) return true;
-  if (['click here','you won\'t believe','shocking','must see'].some(s => title.includes(s))) return true;
+  const source = (article.source || '').toLowerCase();
+
+  // Hard cutoff — articles older than 5 days are stale
+  const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
+  if (ageHours > 120) return true;
+
+  // Known low quality sources — explicit block list
+  const blocked = ['hotair','wnd','arcamax','dailysignal','daily signal',
+    'headtopics','natural news','naturalnews','newsmax','oann','one america',
+    'epoch times','theepochtimes','breitbart news daily','townhall',
+    'redstate','pjmedia','pj media','frontpagemag','american thinker',
+    'thefederalist','lifesitenews','lifesite','westernjournal','western journal',
+    'bizpacreview','twitchy','tpusa','turning point','media research',
+    'mrc','cnsnews','washington examiner blog','the blaze','theblaze',
+    'rightwingwatch','mediaite blog','kbtx','local12','wkrc','fox4',
+    'fox5','fox6','fox7','fox8','fox13','fox17','fox19','fox26','fox29','fox32',
+    'fox35','fox40','fox43','fox44','fox45','fox46','fox47','fox59','wdrb',
+    'wate','wbir','wbtv','wdaf','wdef','wgal','wgn','whas','wiat','wisc',
+    'wjcl','wjla','wkbn','wkrn','wlbt','wlky','wlns','wlox','wlwt','wmaz',
+    'wmbf','wmtw','wnct','wnep','wnem','wnyt','wpbf','wpde','wpmi','wpri',
+    'wptz','wpxi','wrdw','wreg','wsav','wsbt','wsoc','wtae','wtaj','wthr',
+    'wtkr','wtoc','wtop','wtvd','wtvf','wtvr','wtvy','wvlt','wvtm','wwbt',
+    'wxia','wyff'];
+
+  if (blocked.some(b => source.includes(b))) return true;
+
+  // Clickbait patterns
+  if (['you won\'t believe','shocking','must see','click here',
+       'goes viral','breaks internet'].some(s => title.includes(s))) return true;
+
   return false;
 }
 
