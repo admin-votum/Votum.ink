@@ -1158,7 +1158,7 @@ async function fetchNews(stateName) {
   feed.innerHTML = '<div class="empty-state"><div class="empty-glyph" style="animation:pulse 1.5s infinite">V</div><div class="empty-text">Loading news...</div></div>';
 
   try {
-    const res = await fetch(`/.netlify/functions/news?state=${encodeURIComponent(stateName)}&max=10`);
+    const res = await fetch(`/.netlify/functions/news?state=${encodeURIComponent(stateName)}&max=15`);
     const data = await res.json();
     const articles = data.articles || [];
 

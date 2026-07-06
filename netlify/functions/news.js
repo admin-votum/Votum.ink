@@ -112,9 +112,9 @@ function isSpam(article) {
   const title = (article.title || '').toLowerCase();
   const source = (article.source || '').toLowerCase();
 
-  // Hard cutoff — articles older than 5 days are stale
+  // Hard cutoff — articles older than 10 days are stale
   const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
-  if (ageHours > 120) return true;
+  if (ageHours > 240) return true;
 
   // Known low quality sources — explicit block list
   const blocked = ['hotair','wnd','arcamax','dailysignal','daily signal',
@@ -150,7 +150,7 @@ exports.handler = async function(event) {
     'Content-Type': 'application/json'
   };
 
-  const { state, max = 8 } = event.queryStringParameters || {};
+  const { state, max = 10 } = event.queryStringParameters || {};
   if (!state) return { statusCode: 400, headers, body: JSON.stringify({ error: 'state required' }) };
 
   const q = encodeURIComponent(`${state} politics`);
