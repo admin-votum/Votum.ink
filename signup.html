@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Votum Pro — Global Political Intelligence</title>
+<title>Sign up — Votum</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -15,13 +15,19 @@
   --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.13);
   --text: #1A1A18; --muted: #6B6B65; --ink: #1A1A18;
   --dem: #3A6B9E; --rep: #B94040;
-  --gold: #C4A882; --gold-light: #E8D5A3;
+  --green: #7A8A6A; --green-bg: rgba(122,138,106,0.08);
+}
+[data-theme="dark"] {
+  --bg: #0E0E0C; --surface: #161614; --surface2: #1E1E1B;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.11);
+  --text: #EDEAE2; --muted: #7A7A72; --ink: #EDEAE2;
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--bg); color: var(--text);
   min-height: 100vh; display: flex; flex-direction: column;
+  transition: background 0.3s, color 0.3s;
 }
 
 header {
@@ -36,401 +42,217 @@ header {
 }
 .wordmark-dot { width:5px; height:5px; border-radius:50%; background:var(--ink); margin-bottom:2px; flex-shrink:0; }
 .wordmark-sub { font-family:'Inter',sans-serif; font-size:11px; font-weight:300; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
-.nav-links { display:flex; gap:20px; align-items:center; }
-.nav-link { font-size:12px; color:var(--muted); letter-spacing:0.04em; text-decoration:none; transition:color 0.15s; }
+.nav-link { font-size:12px; color:var(--muted); text-decoration:none; letter-spacing:0.04em; transition:color 0.15s; }
 .nav-link:hover { color:var(--text); }
 
-/* HERO */
-.hero {
+/* LAYOUT */
+.page-wrap {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
   padding: 60px 28px 80px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+  gap: 80px;
+  align-items: start;
 }
 
-/* Background world map suggestion */
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(ellipse at 50% 60%, rgba(168,196,212,0.15) 0%, transparent 70%);
-  pointer-events: none;
+/* LEFT — VALUE PROP */
+.value-side { padding-top: 8px; }
+
+.value-label {
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted); margin-bottom: 14px;
 }
 
-.pro-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--muted);
-  margin-bottom: 20px;
-  padding: 4px 14px;
-  border: 0.5px solid var(--border2);
-  border-radius: 20px;
-  background: var(--surface);
-}
-
-.pro-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #C4A882, #8A6A2A);
-}
-
-.hero-title {
+.value-title {
   font-family: 'EB Garamond', serif;
-  font-size: 54px;
-  font-weight: 500;
-  line-height: 1.1;
-  color: var(--text);
+  font-size: 36px; font-weight: 500;
+  line-height: 1.15; color: var(--text);
   margin-bottom: 16px;
-  max-width: 640px;
 }
 
-.hero-title em {
-  font-style: italic;
-  color: var(--muted);
+.value-sub {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.7; margin-bottom: 32px;
+  max-width: 360px;
 }
 
-.hero-sub {
-  font-size: 16px;
-  color: var(--muted);
-  line-height: 1.65;
-  max-width: 460px;
-  margin-bottom: 48px;
-}
-
-/* PRICING CARD */
-.pricing-wrap {
-  display: flex;
-  gap: 16px;
-  align-items: stretch;
-  margin-bottom: 48px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+.plan-cards { display: flex; flex-direction: column; gap: 12px; }
 
 .plan-card {
-  background: var(--surface);
   border: 0.5px solid var(--border2);
-  border-radius: 12px;
-  padding: 28px 32px;
-  width: 280px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  border-radius: 10px; padding: 18px 20px;
+  cursor: pointer; transition: all 0.15s;
+  position: relative;
 }
 
-.plan-card.featured {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 1px rgba(196,168,130,0.3), 0 8px 32px rgba(0,0,0,0.08);
+.plan-card.selected {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+.plan-card-header {
+  display: flex; align-items: baseline;
+  justify-content: space-between; margin-bottom: 10px;
 }
 
 .plan-name {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-}
-
-.plan-name.pro-name {
-  background: linear-gradient(135deg, #C4A882, #8A6A2A);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 13px; font-weight: 500;
+  color: var(--text); letter-spacing: 0.02em;
 }
 
 .plan-price {
   font-family: 'EB Garamond', serif;
-  font-size: 42px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1;
+  font-size: 22px; font-weight: 500; color: var(--text);
 }
 
 .plan-price span {
-  font-size: 16px;
-  color: var(--muted);
   font-family: 'Inter', sans-serif;
-  font-weight: 300;
+  font-size: 11px; font-weight: 300; color: var(--muted);
 }
 
-.plan-desc {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.5;
-  padding-bottom: 14px;
-  border-bottom: 0.5px solid var(--border);
-}
-
-.plan-features {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  flex: 1;
-}
+.plan-features { display: flex; flex-direction: column; gap: 5px; }
 
 .plan-feature {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.4;
+  font-size: 12px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
 }
 
-.feature-check {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  flex-shrink: 0;
-  margin-top: 1px;
+.plan-feature::before {
+  content: '✓'; color: var(--green);
+  font-weight: 500; flex-shrink: 0;
 }
 
-.check-free { background: var(--surface2); color: var(--muted); }
-.check-pro { background: linear-gradient(135deg, #C4A882, #8A6A2A); color: white; }
+.plan-feature.locked::before { content: '🔒'; font-size: 10px; }
+.plan-feature.locked { opacity: 0.5; }
 
-.plan-btn {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  border-radius: 7px;
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  transition: opacity 0.15s;
-  border: none;
-  margin-top: 4px;
-}
-
-.btn-free {
-  background: var(--surface2);
-  color: var(--muted);
-  border: 0.5px solid var(--border2);
-}
-
-.btn-free:hover { opacity: 0.8; }
-
-.btn-pro {
+.pro-badge-inline {
+  font-size: 9px; font-family: 'Inter', sans-serif;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 20px;
   background: linear-gradient(135deg, #2C2C28, #4A4A44);
-  color: var(--gold-light);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-size: 11px;
+  color: #E8D5A3; font-weight: 500; margin-left: 6px;
 }
 
-.btn-pro:hover { opacity: 0.88; }
-
-/* SIGNUP FORM */
-.signup-form-wrap {
-  background: var(--surface);
-  border: 0.5px solid var(--border2);
-  border-radius: 12px;
-  padding: 32px;
-  width: 100%;
-  max-width: 400px;
-  text-align: left;
-  display: none;
+.plan-selected-indicator {
+  position: absolute; top: 16px; right: 16px;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
 }
 
-.signup-form-wrap.visible { display: block; }
+.plan-card.selected .plan-selected-indicator {
+  background: var(--ink); border-color: var(--ink);
+}
+
+.plan-card.selected .plan-selected-indicator::after {
+  content: ''; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--bg);
+}
+
+/* RIGHT — FORM */
+.form-side {}
 
 .form-title {
   font-family: 'EB Garamond', serif;
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 6px;
+  font-size: 24px; font-weight: 500;
+  color: var(--text); margin-bottom: 24px;
 }
 
-.form-sub {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
-}
+.form-group { margin-bottom: 16px; }
 
 .form-label {
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  display: block; font-size: 11px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
 }
 
 .form-input {
-  background: var(--surface2);
+  width: 100%; padding: 10px 14px;
+  background: var(--surface);
   border: 0.5px solid var(--border2);
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-size: 13px;
+  border-radius: 6px; font-size: 14px;
   font-family: 'Inter', sans-serif;
-  color: var(--text);
-  width: 100%;
-  outline: none;
+  color: var(--text); outline: none;
   transition: border-color 0.15s;
 }
 
-.form-input:focus { border-color: var(--gold); }
+.form-input:focus { border-color: var(--ink); }
+.form-input::placeholder { color: var(--muted); }
 
-.form-submit {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #2C2C28, #4A4A44);
-  color: var(--gold-light);
-  border: none;
-  border-radius: 7px;
-  font-size: 11px;
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity 0.15s;
-  margin-top: 6px;
+.form-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; font-size: 11px; color: var(--muted);
+  letter-spacing: 0.06em;
 }
 
-.form-submit:hover { opacity: 0.88; }
+.form-divider::before, .form-divider::after {
+  content: ''; flex: 1; height: 0.5px; background: var(--border2);
+}
+
+.plan-summary {
+  background: var(--surface2);
+  border: 0.5px solid var(--border2);
+  border-radius: 8px; padding: 14px 16px;
+  margin-bottom: 20px;
+  display: flex; justify-content: space-between;
+  align-items: center;
+}
+
+.plan-summary-name { font-size: 13px; color: var(--text); font-weight: 500; }
+.plan-summary-price { font-family: 'EB Garamond', serif; font-size: 18px; color: var(--text); }
+
+.submit-btn {
+  width: 100%; padding: 13px;
+  background: var(--ink); color: var(--bg);
+  border: none; border-radius: 8px;
+  font-size: 13px; font-family: 'Inter', sans-serif;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: opacity 0.15s;
+  margin-bottom: 12px;
+}
+
+.submit-btn:hover { opacity: 0.85; }
 
 .form-note {
-  font-size: 11px;
-  color: var(--muted);
-  text-align: center;
-  margin-top: 12px;
-  line-height: 1.5;
+  font-size: 11px; color: var(--muted);
+  text-align: center; line-height: 1.6;
+  letter-spacing: 0.02em;
 }
 
-/* FEATURES GRID */
-.features-section {
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 60px 28px 80px;
+.form-note a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
+.signin-link {
+  text-align: center; margin-top: 20px;
+  font-size: 12px; color: var(--muted);
 }
 
-.features-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--muted);
-  text-align: center;
-  margin-bottom: 40px;
-}
+.signin-link a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.feature-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 20px;
-  background: var(--surface);
-  border: 0.5px solid var(--border2);
-  border-radius: 10px;
-}
-
-.feature-icon {
-  font-size: 20px;
-  margin-bottom: 2px;
-}
-
-.feature-title {
-  font-family: 'EB Garamond', serif;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.feature-desc {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-/* FOOTER */
-.page-footer {
-  border-top: 0.5px solid var(--border2);
-  padding: 20px 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.footer-copy {
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-}
-
-.footer-links {
-  display: flex;
-  gap: 16px;
-}
-
-.footer-link {
-  font-size: 11px;
-  color: var(--muted);
-  text-decoration: none;
-  letter-spacing: 0.04em;
-  transition: color 0.15s;
-}
-
-.footer-link:hover { color: var(--text); }
-
-/* SUCCESS STATE */
-.success-state {
+/* WAITLIST MODE */
+.waitlist-success {
   display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 32px;
   text-align: center;
+  padding: 40px 20px;
 }
 
-.success-state.visible { display: flex; }
-
-.success-glyph {
+.waitlist-icon {
   font-family: 'EB Garamond', serif;
-  font-size: 42px;
-  color: var(--text);
-  opacity: 0.6;
+  font-size: 48px; color: var(--text);
+  opacity: 0.3; margin-bottom: 16px;
 }
 
-.success-title {
+.waitlist-title {
   font-family: 'EB Garamond', serif;
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text);
+  font-size: 28px; font-weight: 500;
+  color: var(--text); margin-bottom: 10px;
 }
 
-.success-sub {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-  max-width: 280px;
+.waitlist-sub {
+  font-size: 13px; color: var(--muted); line-height: 1.6;
 }
 </style>
 </head>
@@ -440,159 +262,159 @@ header {
   <a class="wordmark" href="index.html">
     Votum <div class="wordmark-dot"></div> <span class="wordmark-sub">ink</span>
   </a>
-  <div class="nav-links">
-    <a class="nav-link" href="index.html">Map</a>
-    <a class="nav-link" href="the-point.html">The Point</a>
-    <a class="nav-link" href="polls.html">Polls</a>
-    <a class="nav-link" href="about.html">About</a>
-  </div>
+  <a class="nav-link" href="index.html">← Back to map</a>
 </header>
 
-<div class="hero">
-  <div class="hero-bg"></div>
+<div class="page-wrap">
 
-  <div class="pro-eyebrow">
-    <div class="pro-dot"></div>
-    Votum Pro
-  </div>
+  <!-- LEFT — VALUE PROP -->
+  <div class="value-side">
+    <div class="value-label">Votum · Plans</div>
+    <div class="value-title">Bias-free intelligence.<br>Your terms.</div>
+    <div class="value-sub">Start with the full US map, news feed, and The Point — free, forever. Upgrade to Pro for global intelligence across 190 countries.</div>
 
-  <div class="hero-title">
-    Bias-free global<br><em>political intelligence.</em>
-  </div>
+    <div class="plan-cards">
 
-  <div class="hero-sub">
-    The world map. Every country. Every story. Analyzed, labeled, and distilled — without agenda, without noise.
-  </div>
-
-  <div class="pricing-wrap">
-    <!-- FREE -->
-    <div class="plan-card">
-      <div class="plan-name">Free</div>
-      <div class="plan-price">$0 <span>/ month</span></div>
-      <div class="plan-desc">Full access to U.S. political intelligence — the map, the news, the polls, The Point.</div>
-      <div class="plan-features">
-        <div class="plan-feature"><div class="feature-check check-free">✓</div>Interactive U.S. electoral map</div>
-        <div class="plan-feature"><div class="feature-check check-free">✓</div>Live news feed — all 50 states</div>
-        <div class="plan-feature"><div class="feature-check check-free">✓</div>The Point — AI article distillation</div>
-        <div class="plan-feature"><div class="feature-check check-free">✓</div>Source bias labeling</div>
-        <div class="plan-feature"><div class="feature-check check-free">✓</div>2026 Senate race tracker</div>
-        <div class="plan-feature"><div class="feature-check check-free">✓</div>No ads. Ever.</div>
+      <div class="plan-card" id="plan-free" onclick="selectPlan('free')">
+        <div class="plan-selected-indicator" id="ind-free"></div>
+        <div class="plan-card-header">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">$0 <span>/ forever</span></div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feature">Interactive US electoral map</div>
+          <div class="plan-feature">Live news feed — all 50 states</div>
+          <div class="plan-feature">The Point — AI article distillation</div>
+          <div class="plan-feature">Source bias labeling</div>
+          <div class="plan-feature">2026 Senate poll tracker</div>
+          <div class="plan-feature">Dark mode</div>
+        </div>
       </div>
-      <a href="index.html" class="plan-btn btn-free">Go to map →</a>
-    </div>
 
-    <!-- PRO -->
-    <div class="plan-card featured">
-      <div class="plan-name pro-name">Pro</div>
-      <div class="plan-price">$7 <span>/ month</span></div>
-      <div class="plan-desc">Everything in Free, plus the world. 190 countries, global coverage, cross-border intelligence.</div>
-      <div class="plan-features">
-        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Everything in Free</div>
-        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Interactive world map — 190 countries</div>
-        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Global news feed per country</div>
-        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Cross-border coverage analysis</div>
-        <div class="plan-feature"><div class="feature-check check-pro">✓</div>The Point — global edition</div>
-        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Daily email digest</div>
-        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Issues deep dive — global topics</div>
+      <div class="plan-card selected" id="plan-pro" onclick="selectPlan('pro')">
+        <div class="plan-selected-indicator" id="ind-pro"></div>
+        <div class="plan-card-header">
+          <div class="plan-name">Pro <span class="pro-badge-inline">Pro</span></div>
+          <div class="plan-price">$7 <span>/ month</span></div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feature">Everything in Free</div>
+          <div class="plan-feature">World map — 190 countries</div>
+          <div class="plan-feature">Global news feed per country</div>
+          <div class="plan-feature">The Point — international edition</div>
+          <div class="plan-feature">Cross-border coverage analysis</div>
+          <div class="plan-feature">Counter story surfacing globally</div>
+          <div class="plan-feature">Early access to new features</div>
+        </div>
       </div>
-      <button class="plan-btn btn-pro" onclick="showSignup()">Get Pro — $7/month</button>
+
     </div>
   </div>
 
-  <!-- SIGNUP FORM -->
-  <div class="signup-form-wrap" id="signup-form">
-    <div id="form-content">
-      <div class="form-title">Join Votum Pro</div>
-      <div class="form-sub">Enter your email to get started. Payment processing coming shortly — early signups get first access and founding member pricing locked in.</div>
+  <!-- RIGHT — FORM -->
+  <div class="form-side">
+
+    <div id="form-wrap">
+      <div class="form-title">Create your account</div>
+
       <div class="form-group">
-        <div class="form-label">Email</div>
-        <input type="email" class="form-input" id="email-input" placeholder="you@example.com">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="email-input" placeholder="you@example.com">
       </div>
+
       <div class="form-group">
-        <div class="form-label">Name</div>
-        <input type="text" class="form-input" id="name-input" placeholder="Your name">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="password-input" placeholder="8+ characters">
       </div>
-      <button class="form-submit" onclick="submitSignup()">Reserve my spot →</button>
-      <div class="form-note">No payment required yet. We'll reach out at hello@votum.ink when Pro launches. Cancel anytime.</div>
-    </div>
-    <div class="success-state" id="success-state">
-      <div class="success-glyph">V</div>
-      <div class="success-title">You're on the list.</div>
-      <div class="success-sub">We'll reach out at your email when Pro launches. Thank you for believing in bias-free intelligence.</div>
-    </div>
-  </div>
-</div>
 
-<!-- FEATURES -->
-<div class="features-section">
-  <div class="features-label">What makes Votum different</div>
-  <div class="features-grid">
-    <div class="feature-item">
-      <div class="feature-icon">🗺</div>
-      <div class="feature-title">The world map</div>
-      <div class="feature-desc">190 countries, clickable. Every country surfaces its own news feed, sourced globally and labeled by lean.</div>
-    </div>
-    <div class="feature-item">
-      <div class="feature-icon">⚡</div>
-      <div class="feature-title">The Point</div>
-      <div class="feature-desc">Every article reduced to one true sentence. The actual news, stripped of scaffolding and bait.</div>
-    </div>
-    <div class="feature-item">
-      <div class="feature-icon">⚖</div>
-      <div class="feature-title">No editorial lean</div>
-      <div class="feature-desc">Sources labeled transparently across the full spectrum. Left, center, right — you see all of it, you decide.</div>
-    </div>
-    <div class="feature-item">
-      <div class="feature-icon">↔</div>
-      <div class="feature-title">Counter stories</div>
-      <div class="feature-desc">Every article surfaces the opposing perspective. Completeness is the standard, not engagement.</div>
-    </div>
-    <div class="feature-item">
-      <div class="feature-icon">📊</div>
-      <div class="feature-title">Coverage spread</div>
-      <div class="feature-desc">See which side of the spectrum is covering a story — and which side is ignoring it. The gap is the signal.</div>
-    </div>
-    <div class="feature-item">
-      <div class="feature-icon">✉</div>
-      <div class="feature-title">Daily digest</div>
-      <div class="feature-desc">The Point, delivered to your inbox every morning. 60 seconds. What actually happened, globally.</div>
-    </div>
-  </div>
-</div>
+      <div class="form-divider">your plan</div>
 
-<div class="page-footer">
-  <div class="footer-copy">© 2026 Votum.ink — Bias-free global political intelligence</div>
-  <div class="footer-links">
-    <a class="footer-link" href="about.html">About</a>
-    <a class="footer-link" href="mailto:hello@votum.ink">Contact</a>
+      <div class="plan-summary" id="plan-summary">
+        <div class="plan-summary-name" id="summary-name">Votum Pro</div>
+        <div class="plan-summary-price" id="summary-price">$7 / mo</div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="handleSubmit()">
+        <span id="btn-label">Continue to payment</span>
+      </button>
+
+      <div class="form-note">
+        By signing up you agree to our <a href="about.html">terms</a>. 
+        Cancel anytime. Payments processed securely via Stripe.
+        <br><br>
+        🔒 Your data is never sold or used for advertising.
+      </div>
+
+      <div class="signin-link">
+        Already have an account? <a href="#">Sign in</a>
+      </div>
+    </div>
+
+    <div class="waitlist-success" id="success-wrap">
+      <div class="waitlist-icon">V</div>
+      <div class="waitlist-title">You're on the list.</div>
+      <div class="waitlist-sub">
+        We'll email you at <strong id="success-email"></strong> when your account is ready.<br><br>
+        Votum Pro is launching soon. You'll be among the first.
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
-function showSignup() {
-  const form = document.getElementById('signup-form');
-  form.classList.add('visible');
-  form.scrollIntoView({behavior:'smooth', block:'center'});
+let selectedPlan = 'pro';
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  document.getElementById('plan-free').classList.toggle('selected', plan === 'free');
+  document.getElementById('plan-pro').classList.toggle('selected', plan === 'pro');
+
+  if (plan === 'pro') {
+    document.getElementById('summary-name').textContent = 'Votum Pro';
+    document.getElementById('summary-price').textContent = '$7 / mo';
+    document.getElementById('btn-label').textContent = 'Continue to payment';
+  } else {
+    document.getElementById('summary-name').textContent = 'Votum Free';
+    document.getElementById('summary-price').textContent = '$0';
+    document.getElementById('btn-label').textContent = 'Create free account';
+  }
 }
 
-async function submitSignup() {
+function handleSubmit() {
   const email = document.getElementById('email-input').value.trim();
-  const name = document.getElementById('name-input').value.trim();
+  const password = document.getElementById('password-input').value;
 
   if (!email || !email.includes('@')) {
+    document.getElementById('email-input').focus();
     document.getElementById('email-input').style.borderColor = '#B94040';
     return;
   }
 
-  // Store in localStorage for now — Supabase integration coming
-  const signups = JSON.parse(localStorage.getItem('votum-signups') || '[]');
-  signups.push({email, name, date: new Date().toISOString(), plan:'pro'});
-  localStorage.setItem('votum-signups', JSON.stringify(signups));
+  if (password.length < 8) {
+    document.getElementById('password-input').focus();
+    document.getElementById('password-input').style.borderColor = '#B94040';
+    return;
+  }
 
-  // Show success
-  document.getElementById('form-content').style.display = 'none';
-  document.getElementById('success-state').classList.add('visible');
+  // For now — add to waitlist
+  // TODO: wire to Supabase auth + Stripe checkout
+  document.getElementById('form-wrap').style.display = 'none';
+  document.getElementById('success-wrap').style.display = 'block';
+  document.getElementById('success-email').textContent = email;
+
+  // Send to Netlify function when ready
+  fetch('/.netlify/functions/waitlist', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, plan: selectedPlan })
+  }).catch(() => {}); // Silent fail for now
 }
+
+// Dark mode — follow system preference on signup page
+const toggle = document.createElement('button');
+let dark = localStorage.getItem('votum-theme') === 'dark';
+if (dark) document.documentElement.setAttribute('data-theme', 'dark');
 </script>
 </body>
 </html>

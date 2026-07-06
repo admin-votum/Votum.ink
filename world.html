@@ -18,8 +18,8 @@
   --country-hover: #B8B0A0;
   --country-selected: #2C2C28;
   --country-stroke: #F7F5F0;
-  --ocean: #A8C4D4;
-  --ocean-dark: #8AAFC2;
+  --ocean: #3A3A3A;
+  --ocean-dark: #2A2A2A;
 }
 [data-theme="dark"] {
   --bg: #0E0E0C; --surface: #161614; --surface2: #1E1E1B;
@@ -500,7 +500,7 @@ header {
       <div class="pro-lock-card">
         <span class="pro-lock-icon">🌍</span>
         <div class="pro-lock-title">Votum Pro</div>
-        <div class="pro-lock-sub">Global political intelligence.</div>
+        <div class="pro-lock-sub">Global intelligence.</div>
         <div class="pro-lock-tagline">Bias-free news and data<br>from every country on earth.</div>
         <div class="pro-lock-price">$7 <span>/ month</span></div>
         <div class="pro-lock-features" style="margin-top:16px;">
@@ -1058,7 +1058,7 @@ async function loadWorldMap() {
   cableGroup.setAttribute('id', 'cables');
 
   CABLES.forEach(cable => {
-    const el = drawRoute(cable.points, '#6A9FBF', 0.35, 0.8, '3,4');
+    const el = drawRoute(cable.points, 'rgba(255,255,255,0.25)', 0.25, 0.8, '3,4');
     if (el) cableGroup.appendChild(el);
   });
 
@@ -1068,10 +1068,10 @@ async function loadWorldMap() {
 
   SHIPPING.forEach(route => {
     // Draw shadow/glow first
-    const shadow = drawRoute(route.points, '#C4A882', 0.08, 3);
+    const shadow = drawRoute(route.points, 'rgba(255,255,255,0.06)', 0.06, 3);
     if (shadow) shippingGroup.appendChild(shadow);
     // Then the route itself
-    const el = drawRoute(route.points, '#C4A882', 0.45, 1.2);
+    const el = drawRoute(route.points, 'rgba(255,255,255,0.6)', 0.6, 1.2);
     if (el) shippingGroup.appendChild(el);
   });
 
@@ -1100,7 +1100,7 @@ async function loadWorldMap() {
 
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('r', '2');
-    dot.setAttribute('fill', '#E8D5A3');
+    dot.setAttribute('fill', 'rgba(255,255,255,0.8)');
     dot.setAttribute('opacity', '0.8');
     svg.appendChild(dot);
 
@@ -1146,8 +1146,8 @@ async function loadWorldMap() {
   legendG.setAttribute('transform', 'translate(10, 470)');
 
   const legendItems = [
-    {color:'#C4A882', dash:'', label:'Shipping routes', opacity:0.7},
-    {color:'#6A9FBF', dash:'3,4', label:'Submarine cables', opacity:0.7},
+    {color:'rgba(255,255,255,0.6)', dash:'', label:'Shipping routes', opacity:0.7},
+    {color:'rgba(255,255,255,0.3)', dash:'3,4', label:'Submarine cables', opacity:0.7},
   ];
 
   legendItems.forEach((item, i) => {
@@ -1176,8 +1176,17 @@ async function loadWorldMap() {
 
 // PRO LOCK — check if user has Pro access
 // Later: check Supabase session/subscription status
-// PRO LOCK — temporarily disabled during development
-document.getElementById('pro-lock').style.display = 'none';
+const isPro = localStorage.getItem('votum-pro') === 'true' ||
+              new URLSearchParams(window.location.search).get('pro') === 'true';
+
+const proLock = document.getElementById('pro-lock');
+if (isPro) {
+  proLock.style.display = 'none';
+} else {
+  // Blur/dim map when locked
+  document.getElementById('map-container').style.filter = 'none';
+  document.getElementById('map-container').style.pointerEvents = 'none';
+}
 
 // DARK MODE
 const toggle = document.getElementById('theme-toggle');
