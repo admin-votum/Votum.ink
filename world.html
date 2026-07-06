@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World — Votum Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.13);
+  --text: #1A1A18; --muted: #6B6B65; --ink: #1A1A18;
+  --country: #C8C4B8;
+  --country-hover: #A8A49A;
+  --country-selected: #1A1A18;
+  --ocean: #E8E4DC;
+}
+[data-theme="dark"] {
+  --bg: #0E0E0C; --surface: #161614; --surface2: #1E1E1B;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.11);
+  --text: #EDEAE2; --muted: #7A7A72; --ink: #EDEAE2;
+  --country: #2A2A26;
+  --country-hover: #3A3A36;
+  --country-selected: #EDEAE2;
+  --ocean: #161614;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  height: 100vh; display: flex; flex-direction: column;
+  overflow: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  border-bottom: 0.5px solid var(--border2);
+  background: var(--surface); flex-shrink: 0;
+  transition: background 0.3s;
+}
+.wordmark {
+  font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 500;
+  color: var(--ink); display: flex; align-items: baseline; gap: 8px; text-decoration: none;
+}
+.wordmark-dot { width:5px; height:5px; border-radius:50%; background:var(--ink); margin-bottom:2px; flex-shrink:0; }
+.wordmark-sub { font-family:'Inter',sans-serif; font-size:11px; font-weight:300; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+.pro-badge {
+  font-size:9px; font-family:'Inter',sans-serif; letter-spacing:0.1em;
+  text-transform:uppercase; padding:2px 7px; border-radius:20px;
+  background: linear-gradient(135deg, #2C2C28, #4A4A44);
+  color: #E8D5A3; margin-left:6px; font-weight:500;
+}
+.nav-links { display:flex; gap:20px; align-items:center; }
+.nav-link { font-size:12px; color:var(--muted); letter-spacing:0.04em; cursor:pointer; text-decoration:none; transition:color 0.15s; }
+.nav-link:hover { color:var(--text); }
+.nav-link.active { color:var(--text); border-bottom:1px solid var(--border2); padding-bottom:1px; }
+.theme-toggle {
+  background:none; border:0.5px solid var(--border2); color:var(--muted);
+  width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.2s; margin-left:8px;
+}
+.theme-toggle:hover { color:var(--text); border-color:var(--text); }
+
+/* MAIN LAYOUT */
+.main { display:flex; flex-direction:column; flex:1; overflow:hidden; }
+
+/* MAP PANEL */
+.map-panel {
+  flex: 0 0 62%;
+  display:flex; align-items:center; justify-content:center;
+  border-bottom:0.5px solid var(--border2);
+  background: var(--bg);
+  position:relative; overflow:hidden;
+  transition: background 0.3s;
+}
+
+#map-container {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  padding: 8px 24px;
+}
+
+#world-map { width:100%; height:auto; display:block; }
+
+.country-path {
+  fill: var(--country);
+  stroke: var(--bg);
+  stroke-width: 0.4;
+  cursor: pointer;
+  transition: fill 0.12s;
+}
+.country-path:hover { fill: var(--country-hover); }
+.country-path.selected { fill: var(--ink); stroke: var(--accent); stroke-width: 1.5; }
+.country-path.has-news { fill: #4A7A5A; }
+.country-path.has-news:hover { fill: #3A6A4A; }
+.country-path.has-news.selected { fill: var(--ink); }
+
+/* REGION FILTERS */
+.map-filters {
+  position:absolute; bottom:14px; left:28px;
+  display:flex; gap:5px; flex-wrap:wrap;
+}
+.region-btn {
+  background:var(--surface); border:0.5px solid var(--border2);
+  color:var(--muted); font-size:10px; font-family:'Inter',sans-serif;
+  padding:3px 10px; border-radius:20px; cursor:pointer;
+  letter-spacing:0.04em; transition:all 0.15s;
+}
+.region-btn:hover, .region-btn.active {
+  background:var(--ink); color:var(--bg); border-color:var(--ink);
+}
+
+/* TOOLTIP */
+.state-tooltip {
+  position:fixed; pointer-events:none; display:none; z-index:200; width:220px;
+}
+.tooltip-card {
+  background:var(--surface); border:0.5px solid var(--border2);
+  border-radius:10px; overflow:hidden;
+  box-shadow:0 4px 28px rgba(0,0,0,0.12);
+}
+.tooltip-header {
+  padding:10px 14px 8px;
+  border-bottom:0.5px solid var(--border);
+  display:flex; align-items:baseline; justify-content:space-between;
+}
+.tooltip-country { font-family:'EB Garamond',serif; font-size:16px; font-weight:500; color:var(--text); }
+.tooltip-region { font-size:10px; color:var(--muted); letter-spacing:0.04em; }
+.tooltip-body { padding:10px 14px; display:flex; flex-direction:column; gap:7px; }
+.tooltip-row { display:flex; justify-content:space-between; font-size:12px; }
+.tooltip-label { color:var(--muted); font-size:11px; letter-spacing:0.04em; }
+.tooltip-value { font-weight:500; color:var(--text); font-size:12px; }
+.tooltip-footer { padding:7px 14px; border-top:0.5px solid var(--border); font-size:10px; color:var(--muted); }
+
+/* NEWS PANEL */
+.news-panel {
+  flex:1; display:flex; flex-direction:column;
+  overflow:hidden; background:var(--surface);
+  transition: background 0.3s;
+}
+.news-header {
+  padding:10px 28px; border-bottom:0.5px solid var(--border2);
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+}
+.news-state-label {
+  font-family:'EB Garamond',serif; font-size:15px; color:var(--text); font-style:italic;
+}
+.news-state-label span { font-style:normal; color:var(--muted); font-family:'Inter',sans-serif; font-size:12px; }
+.filter-row { display:flex; gap:5px; align-items:center; }
+.filter-label { font-size:11px; color:var(--muted); margin-right:4px; letter-spacing:0.04em; }
+.filter-btn {
+  background:none; border:0.5px solid var(--border2); color:var(--muted);
+  font-size:11px; font-family:'Inter',sans-serif; padding:3px 11px;
+  border-radius:20px; cursor:pointer; letter-spacing:0.04em; transition:all 0.15s;
+}
+.filter-btn:hover { color:var(--text); border-color:var(--text); }
+.filter-btn.active { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+
+.news-feed {
+  flex:1; overflow-y:auto; padding:14px 28px;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+  gap:12px; align-content:start;
+}
+.news-feed::-webkit-scrollbar { width:3px; }
+.news-feed::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+.news-card {
+  background:var(--surface); border:0.5px solid var(--border2);
+  border-radius:8px; padding:16px 18px; cursor:pointer;
+  transition:background 0.15s; display:flex; flex-direction:column;
+  gap:7px; min-height:110px;
+}
+.news-card:hover { background:var(--surface2); }
+.news-source-row { display:flex; align-items:center; gap:6px; }
+.bias-pip { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.pip-left { background:#3A6B9E; }
+.pip-center-left { background:#7A9FBF; }
+.pip-center { background:#7A8A6A; }
+.pip-center-right { background:#BF9A6A; }
+.pip-right { background:#B94040; }
+.news-source-name { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); }
+.news-headline { font-size:14px; line-height:1.5; color:var(--text); }
+.news-time { font-size:11px; color:var(--muted); }
+
+.empty-state {
+  grid-column:1/-1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:48px; gap:12px;
+}
+.empty-glyph { font-family:'EB Garamond',serif; font-size:48px; opacity:0.15; color:var(--text); }
+.empty-text { font-size:13px; color:var(--muted); text-align:center; line-height:1.6; }
+
+/* DRAWER */
+.drawer-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.22); z-index:300;
+  opacity:0; pointer-events:none; transition:opacity 0.25s ease;
+}
+.drawer-overlay.open { opacity:1; pointer-events:all; }
+.article-drawer {
+  position:fixed; top:52px; right:0; bottom:0; width:380px;
+  background:var(--surface); border-left:0.5px solid var(--border2);
+  z-index:400; display:flex; flex-direction:column;
+  transform:translateX(100%);
+  transition:transform 0.28s cubic-bezier(0.22,1,0.36,1);
+}
+.article-drawer.open { transform:translateX(0); }
+.drawer-header {
+  padding:14px 18px 12px; border-bottom:0.5px solid var(--border);
+  display:flex; align-items:flex-start; gap:12px; flex-shrink:0;
+}
+.drawer-header-content { flex:1; }
+.drawer-source-row { display:flex; align-items:center; gap:7px; margin-bottom:7px; }
+.drawer-close {
+  background:none; border:0.5px solid var(--border2); color:var(--muted);
+  width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:16px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0;
+}
+.drawer-close:hover { color:var(--text); border-color:var(--text); }
+.drawer-title { font-family:'EB Garamond',serif; font-size:18px; line-height:1.38; font-weight:500; color:var(--text); }
+.drawer-body { flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:14px; }
+.drawer-body::-webkit-scrollbar { width:3px; }
+.drawer-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.drawer-img { width:100%; height:170px; object-fit:cover; border-radius:6px; background:var(--surface2); }
+.drawer-img-placeholder { width:100%; height:120px; background:var(--surface2); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'EB Garamond',serif; font-size:36px; color:var(--muted); opacity:0.25; }
+.drawer-desc { font-size:14px; line-height:1.72; color:var(--text); }
+.drawer-meta { font-size:11px; color:var(--muted); letter-spacing:0.04em; padding-top:4px; border-top:0.5px solid var(--border); }
+.drawer-footer { padding:12px 18px; border-top:0.5px solid var(--border); flex-shrink:0; }
+.drawer-read-btn {
+  display:block; width:100%; padding:10px;
+  background:var(--ink); color:var(--bg); border:none; border-radius:6px;
+  font-size:12px; font-family:'Inter',sans-serif; letter-spacing:0.06em;
+  text-transform:uppercase; cursor:pointer; text-align:center; text-decoration:none;
+  transition:opacity 0.15s;
+}
+.drawer-read-btn:hover { opacity:0.82; }
+
+/* VOTUM ANALYSIS */
+.votum-panel { border-top:0.5px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:16px; }
+.vp-section { display:flex; flex-direction:column; gap:7px; }
+.vp-label { font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); font-weight:500; }
+.vp-point { font-family:'EB Garamond',serif; font-size:16px; line-height:1.5; color:var(--text); font-style:italic; }
+.spread-bar { height:5px; border-radius:3px; overflow:hidden; display:flex; background:var(--surface2); }
+.spread-seg { height:100%; transition:width 0.5s ease; }
+.spread-l { background:var(--dem); } .spread-c { background:#7A8A6A; } .spread-r { background:var(--rep); }
+.spread-labels { display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:3px; }
+.vp-flags { display:flex; flex-wrap:wrap; gap:5px; }
+.vp-flag { font-size:10px; padding:3px 9px; border-radius:20px; letter-spacing:0.03em; border:0.5px solid; }
+.flag-caution { background:rgba(186,112,0,0.08); color:#8A5500; border-color:rgba(186,112,0,0.2); }
+.flag-info { background:rgba(58,107,158,0.08); color:#2A5A8A; border-color:rgba(58,107,158,0.2); }
+.flag-warn { background:rgba(160,40,40,0.08); color:#8A2020; border-color:rgba(160,40,40,0.2); }
+[data-theme="dark"] .flag-caution { background:rgba(186,112,0,0.15); color:#D4922A; border-color:rgba(186,112,0,0.3); }
+[data-theme="dark"] .flag-info { background:rgba(58,107,158,0.15); color:#6AABE0; border-color:rgba(58,107,158,0.3); }
+[data-theme="dark"] .flag-warn { background:rgba(160,40,40,0.15); color:#E06060; border-color:rgba(160,40,40,0.3); }
+.vp-score-row { display:flex; align-items:center; gap:10px; }
+.vp-score-bar-wrap { flex:1; height:5px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+.vp-score-bar { height:100%; border-radius:3px; transition:width 0.6s ease; }
+.vp-score-num { font-family:'EB Garamond',serif; font-size:16px; font-weight:500; color:var(--text); min-width:30px; text-align:right; }
+.vp-score-note { font-size:11px; color:var(--muted); line-height:1.5; }
+.vp-counter-card { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; background:var(--surface2); border:0.5px solid var(--border2); border-radius:7px; text-decoration:none; transition:background 0.15s; }
+.vp-counter-card:hover { background:var(--border); }
+.vp-counter-source { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:3px; }
+.vp-counter-title { font-size:13px; color:var(--text); line-height:1.4; flex:1; }
+.vp-counter-arrow { color:var(--muted); font-size:12px; flex-shrink:0; }
+.votum-loading { display:none; flex-direction:column; gap:8px; padding-top:14px; border-top:0.5px solid var(--border); }
+.vl-bar { height:10px; width:100%; border-radius:4px; background:var(--surface2); animation:vl-pulse 1.4s ease-in-out infinite; }
+@keyframes vl-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+</style>
+</head>
+<body>
+
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<div class="article-drawer" id="article-drawer">
+  <div class="drawer-header">
+    <div class="drawer-header-content">
+      <div class="drawer-source-row">
+        <div class="bias-pip" id="drawer-pip"></div>
+        <span class="news-source-name" id="drawer-source">—</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="drawer-time">—</span>
+      </div>
+      <div class="drawer-title" id="drawer-title">—</div>
+    </div>
+    <button class="drawer-close" id="drawer-close">×</button>
+  </div>
+  <div class="drawer-body">
+    <div id="drawer-img-wrap"></div>
+    <div class="drawer-desc" id="drawer-desc"></div>
+    <div class="drawer-meta" id="drawer-meta"></div>
+    <div class="votum-panel" id="votum-panel" style="display:none">
+      <div class="vp-section">
+        <div class="vp-label">The Point</div>
+        <div class="vp-point" id="vp-point">—</div>
+      </div>
+      <div class="vp-section">
+        <div class="vp-label">Coverage Spread</div>
+        <div class="spread-bar">
+          <div class="spread-seg spread-l" id="spread-l"></div>
+          <div class="spread-seg spread-c" id="spread-c"></div>
+          <div class="spread-seg spread-r" id="spread-r"></div>
+        </div>
+        <div class="spread-labels">
+          <span id="spread-l-label">Left</span>
+          <span id="spread-c-label">Center</span>
+          <span id="spread-r-label">Right</span>
+        </div>
+      </div>
+      <div class="vp-section">
+        <div class="vp-label">Flags</div>
+        <div class="vp-flags" id="vp-flags"></div>
+      </div>
+      <div class="vp-section">
+        <div class="vp-label">Source Score</div>
+        <div class="vp-score-row">
+          <div class="vp-score-bar-wrap"><div class="vp-score-bar" id="vp-score-bar"></div></div>
+          <span class="vp-score-num" id="vp-score-num">—</span>
+        </div>
+        <div class="vp-score-note" id="vp-score-note"></div>
+      </div>
+      <div class="vp-section" id="vp-counter-wrap" style="display:none">
+        <div class="vp-label">Counter Story</div>
+        <a class="vp-counter-card" id="vp-counter-card" href="#" target="_blank" rel="noopener">
+          <div><div class="vp-counter-source" id="vp-counter-source"></div><div class="vp-counter-title" id="vp-counter-title"></div></div>
+          <span class="vp-counter-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+    <div class="votum-loading" id="votum-loading">
+      <div class="vl-bar"></div>
+      <div class="vl-bar" style="width:70%;animation-delay:0.15s"></div>
+      <div class="vl-bar" style="width:85%;animation-delay:0.3s"></div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <a class="drawer-read-btn" id="drawer-link" href="#" target="_blank" rel="noopener">Read full article ↗</a>
+  </div>
+</div>
+
+<header>
+  <div style="display:flex;align-items:center">
+    <a class="wordmark" href="index.html">
+      Votum <div class="wordmark-dot"></div> <span class="wordmark-sub">ink</span>
+    </a>
+    <span class="pro-badge">Pro</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">US Map</a>
+    <a class="nav-link active" href="world.html">World</a>
+    <a class="nav-link" href="the-point.html">The Point</a>
+    <a class="nav-link" href="polls.html">Polls</a>
+    <a class="nav-link" href="about.html">About</a>
+    <button class="theme-toggle" id="theme-toggle">☀</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="map-panel">
+    <div id="map-container">
+      <svg id="world-map" viewBox="0 0 960 500" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="map-filters">
+      <button class="region-btn active" data-region="all">All regions</button>
+      <button class="region-btn" data-region="europe">Europe</button>
+      <button class="region-btn" data-region="middle-east">Middle East</button>
+      <button class="region-btn" data-region="asia">Asia</button>
+      <button class="region-btn" data-region="americas">Americas</button>
+      <button class="region-btn" data-region="africa">Africa</button>
+    </div>
+  </div>
+
+  <div class="news-panel">
+    <div class="news-header">
+      <div class="news-state-label" id="news-label">
+        <span>Select a country to load its news &nbsp;·&nbsp; hover for quick stats</span>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Source</span>
+        <button class="filter-btn active" data-bias="all">All</button>
+        <button class="filter-btn" data-bias="left">Left</button>
+        <button class="filter-btn" data-bias="center">Center</button>
+        <button class="filter-btn" data-bias="right">Right</button>
+      </div>
+    </div>
+    <div class="news-feed" id="news-feed">
+      <div class="empty-state">
+        <div class="empty-glyph">🌍</div>
+        <div class="empty-text">Click any country on the map<br>to surface its global news coverage</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="state-tooltip" id="state-tooltip">
+  <div class="tooltip-card">
+    <div class="tooltip-header">
+      <div class="tooltip-country" id="tt-name">—</div>
+      <div class="tooltip-region" id="tt-region">—</div>
+    </div>
+    <div class="tooltip-body">
+      <div class="tooltip-row">
+        <span class="tooltip-label">Region</span>
+        <span class="tooltip-value" id="tt-region2">—</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Top issue</span>
+        <span class="tooltip-value" id="tt-issue">—</span>
+      </div>
+    </div>
+    <div class="tooltip-footer">Click to load global news coverage</div>
+  </div>
+</div>
+
+<script type="module">
+// Country data — name, region, top issue
+const COUNTRY_DATA = {
+  "Afghanistan":   {region:"Asia",issue:"Taliban governance"},
+  "Albania":       {region:"Europe",issue:"EU accession"},
+  "Algeria":       {region:"Africa",issue:"Energy exports"},
+  "Angola":        {region:"Africa",issue:"Oil economy"},
+  "Argentina":     {region:"Americas",issue:"Economic reform"},
+  "Armenia":       {region:"Asia",issue:"Nagorno-Karabakh"},
+  "Australia":     {region:"Asia",issue:"China relations"},
+  "Austria":       {region:"Europe",issue:"Migration"},
+  "Azerbaijan":    {region:"Asia",issue:"South Caucasus"},
+  "Bangladesh":    {region:"Asia",issue:"Political transition"},
+  "Belarus":       {region:"Europe",issue:"Authoritarianism"},
+  "Belgium":       {region:"Europe",issue:"Coalition politics"},
+  "Bolivia":       {region:"Americas",issue:"Political instability"},
+  "Bosnia and Herzegovina":{region:"Europe",issue:"EU integration"},
+  "Brazil":        {region:"Americas",issue:"Amazon & democracy"},
+  "Bulgaria":      {region:"Europe",issue:"Corruption"},
+  "Cambodia":      {region:"Asia",issue:"Hun Sen dynasty"},
+  "Cameroon":      {region:"Africa",issue:"Anglophone crisis"},
+  "Canada":        {region:"Americas",issue:"US trade relations"},
+  "Central African Republic":{region:"Africa",issue:"Wagner Group"},
+  "Chad":          {region:"Africa",issue:"Sahel instability"},
+  "Chile":         {region:"Americas",issue:"Constitutional reform"},
+  "China":         {region:"Asia",issue:"Taiwan & trade war"},
+  "Colombia":      {region:"Americas",issue:"Peace process"},
+  "Congo":         {region:"Africa",issue:"Mineral conflict"},
+  "Croatia":       {region:"Europe",issue:"EU politics"},
+  "Cuba":          {region:"Americas",issue:"Economic crisis"},
+  "Czech Republic":{region:"Europe",issue:"NATO & energy"},
+  "Denmark":       {region:"Europe",issue:"Greenland & Arctic"},
+  "Ecuador":       {region:"Americas",issue:"Gang violence"},
+  "Egypt":         {region:"Middle East",issue:"Gaza & economy"},
+  "El Salvador":   {region:"Americas",issue:"Bukele authoritarianism"},
+  "Ethiopia":      {region:"Africa",issue:"Tigray aftermath"},
+  "Finland":       {region:"Europe",issue:"NATO membership"},
+  "France":        {region:"Europe",issue:"Political fragmentation"},
+  "Georgia":       {region:"Europe",issue:"Russia & EU"},
+  "Germany":       {region:"Europe",issue:"Economy & AfD"},
+  "Ghana":         {region:"Africa",issue:"Economic recovery"},
+  "Greece":        {region:"Europe",issue:"Migration & Turkey"},
+  "Guatemala":     {region:"Americas",issue:"Anti-corruption"},
+  "Haiti":         {region:"Americas",issue:"Gang control"},
+  "Honduras":      {region:"Americas",issue:"Migration"},
+  "Hungary":       {region:"Europe",issue:"Orban & EU"},
+  "India":         {region:"Asia",issue:"Modi & elections"},
+  "Indonesia":     {region:"Asia",issue:"Prabowo presidency"},
+  "Iran":          {region:"Middle East",issue:"Nuclear & sanctions"},
+  "Iraq":          {region:"Middle East",issue:"Iran influence"},
+  "Ireland":       {region:"Europe",issue:"Migration & housing"},
+  "Israel":        {region:"Middle East",issue:"Gaza war"},
+  "Italy":         {region:"Europe",issue:"Meloni government"},
+  "Japan":         {region:"Asia",issue:"Rearmament & China"},
+  "Jordan":        {region:"Middle East",issue:"Gaza refugees"},
+  "Kazakhstan":    {region:"Asia",issue:"Russia distance"},
+  "Kenya":         {region:"Africa",issue:"Ruto government"},
+  "Lebanon":       {region:"Middle East",issue:"Reconstruction"},
+  "Libya":         {region:"Africa",issue:"Civil war"},
+  "Malaysia":      {region:"Asia",issue:"Anwar reforms"},
+  "Mali":          {region:"Africa",issue:"Junta & Wagner"},
+  "Mexico":        {region:"Americas",issue:"Cartel violence"},
+  "Moldova":       {region:"Europe",issue:"Russia pressure"},
+  "Morocco":       {region:"Africa",issue:"Western Sahara"},
+  "Mozambique":    {region:"Africa",issue:"Insurgency"},
+  "Myanmar":       {region:"Asia",issue:"Military junta"},
+  "Netherlands":   {region:"Europe",issue:"Wilders government"},
+  "New Zealand":   {region:"Asia",issue:"Treaty & economy"},
+  "Nicaragua":     {region:"Americas",issue:"Ortega dictatorship"},
+  "Niger":         {region:"Africa",issue:"Junta & France"},
+  "Nigeria":       {region:"Africa",issue:"Tinubu reforms"},
+  "North Korea":   {region:"Asia",issue:"Nuclear weapons"},
+  "Norway":        {region:"Europe",issue:"Energy & NATO"},
+  "Pakistan":      {region:"Asia",issue:"Imran Khan & army"},
+  "Palestine":     {region:"Middle East",issue:"Gaza war"},
+  "Panama":        {region:"Americas",issue:"Canal & US pressure"},
+  "Paraguay":      {region:"Americas",issue:"Taiwan relations"},
+  "Peru":          {region:"Americas",issue:"Political chaos"},
+  "Philippines":   {region:"Asia",issue:"South China Sea"},
+  "Poland":        {region:"Europe",issue:"Tusk & rule of law"},
+  "Portugal":      {region:"Europe",issue:"Immigration & housing"},
+  "Romania":       {region:"Europe",issue:"NATO & far right"},
+  "Russia":        {region:"Europe",issue:"Ukraine war"},
+  "Saudi Arabia":  {region:"Middle East",issue:"Vision 2030 & Gaza"},
+  "Senegal":       {region:"Africa",issue:"New democracy"},
+  "Serbia":        {region:"Europe",issue:"Kosovo & EU"},
+  "Slovakia":      {region:"Europe",issue:"Fico & Russia"},
+  "Somalia":       {region:"Africa",issue:"Al-Shabaab"},
+  "South Africa":  {region:"Africa",issue:"ANC coalition"},
+  "South Korea":   {region:"Asia",issue:"Political crisis"},
+  "South Sudan":   {region:"Africa",issue:"Civil war"},
+  "Spain":         {region:"Europe",issue:"Sanchez & Catalonia"},
+  "Sri Lanka":     {region:"Asia",issue:"Economic recovery"},
+  "Sudan":         {region:"Africa",issue:"Civil war"},
+  "Sweden":        {region:"Europe",issue:"NATO & crime"},
+  "Switzerland":   {region:"Europe",issue:"Neutrality & finance"},
+  "Syria":         {region:"Middle East",issue:"Post-Assad transition"},
+  "Taiwan":        {region:"Asia",issue:"China threat"},
+  "Thailand":      {region:"Asia",issue:"Political reform"},
+  "Tunisia":       {region:"Africa",issue:"Saied autocracy"},
+  "Turkey":        {region:"Middle East",issue:"Erdogan & economy"},
+  "Uganda":        {region:"Africa",issue:"Museveni & LGBTQ"},
+  "Ukraine":       {region:"Europe",issue:"Russia war"},
+  "United Arab Emirates":{region:"Middle East",issue:"Regional influence"},
+  "United Kingdom":{region:"Europe",issue:"Starmer government"},
+  "United States": {region:"Americas",issue:"2026 Midterms"},
+  "Uruguay":       {region:"Americas",issue:"Stable democracy"},
+  "Uzbekistan":    {region:"Asia",issue:"Authoritarian reform"},
+  "Venezuela":     {region:"Americas",issue:"Maduro & opposition"},
+  "Vietnam":       {region:"Asia",issue:"US-China balance"},
+  "Yemen":         {region:"Middle East",issue:"Houthi war"},
+  "Zimbabwe":      {region:"Africa",issue:"Mnangagwa & economy"},
+};
+
+const BIAS_GROUPS = {
+  all:['left','center-left','center','center-right','right'],
+  left:['left','center-left'], center:['center'], right:['right','center-right']
+};
+
+let selectedCountry = null;
+let activeBias = 'all';
+
+function guessBias(n='') {
+  n = n.toLowerCase();
+  if (['fox news','breitbart','national review','new york post','daily wire'].some(s=>n.includes(s))) return {bias:'right',pip:'pip-right'};
+  if (['wall street journal','dispatch','reason'].some(s=>n.includes(s))) return {bias:'center-right',pip:'pip-center-right'};
+  if (['new york times','washington post','guardian','bbc','al jazeera','the atlantic'].some(s=>n.includes(s))) return {bias:'left',pip:'pip-left'};
+  if (['reuters','ap news','axios','politico','the hill','bloomberg','npr'].some(s=>n.includes(s))) return {bias:'center',pip:'pip-center'};
+  return {bias:'center-left',pip:'pip-center-left'};
+}
+
+function timeAgoFromDate(d) {
+  if (!d) return '—';
+  const diff = Math.floor((Date.now()-new Date(d))/60000);
+  if (diff<60) return `${diff}m ago`;
+  if (diff<1440) return `${Math.floor(diff/60)}h ago`;
+  return `${Math.floor(diff/1440)}d ago`;
+}
+
+async function fetchCountryNews(countryName) {
+  const feed = document.getElementById('news-feed');
+  feed.innerHTML = '<div class="empty-state"><div class="empty-glyph" style="font-size:32px;opacity:0.3">🌍</div><div class="empty-text">Loading news...</div></div>';
+
+  try {
+    const res = await fetch(`/.netlify/functions/news?state=${encodeURIComponent(countryName)}&max=15`);
+    const data = await res.json();
+    const articles = data.articles || [];
+
+    if (!articles.length) throw new Error('No articles');
+
+    const toShow = activeBias === 'all' ? articles : articles.filter(a => {
+      const src = guessBias(a.source);
+      return BIAS_GROUPS[activeBias].includes(src.bias);
+    });
+
+    feed.innerHTML = '';
+
+    if (!toShow.length) {
+      feed.innerHTML = '<div class="empty-state"><div class="empty-glyph">·</div><div class="empty-text">No sources match this filter</div></div>';
+      return;
+    }
+
+    toShow.forEach(a => {
+      const src = guessBias(a.source);
+      const card = document.createElement('div');
+      card.className = 'news-card';
+      card.innerHTML = `
+        <div class="news-source-row">
+          <div class="bias-pip ${src.pip}"></div>
+          <span class="news-source-name">${a.source}</span>
+        </div>
+        <div class="news-headline">${a.title}</div>
+        <div class="news-time">${timeAgoFromDate(a.publishedAt)}</div>
+      `;
+      card.addEventListener('click', () => openDrawer({
+        title: a.title,
+        description: a.description || 'No preview available.',
+        source: a.source, url: a.url,
+        image: a.image, publishedAt: a.publishedAt,
+        pip: src.pip
+      }));
+      feed.appendChild(card);
+    });
+
+  } catch(err) {
+    feed.innerHTML = '<div class="empty-state"><div class="empty-glyph">🌍</div><div class="empty-text">No recent coverage found<br>for this country</div></div>';
+  }
+}
+
+// DRAWER
+const drawer = document.getElementById('article-drawer');
+const overlay = document.getElementById('drawer-overlay');
+document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+function openDrawer(article) {
+  document.getElementById('drawer-title').textContent = article.title;
+  document.getElementById('drawer-source').textContent = article.source;
+  document.getElementById('drawer-time').textContent = timeAgoFromDate(article.publishedAt);
+  document.getElementById('drawer-desc').textContent = article.description;
+  document.getElementById('drawer-meta').textContent = new Date(article.publishedAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('drawer-link').href = article.url;
+  document.getElementById('drawer-pip').className = `bias-pip ${article.pip}`;
+  const imgWrap = document.getElementById('drawer-img-wrap');
+  if (article.image) {
+    imgWrap.innerHTML = `<img class="drawer-img" src="${article.image}" alt="" loading="lazy" onerror="this.outerHTML='<div class=drawer-img-placeholder>V</div>'">`;
+  } else {
+    imgWrap.innerHTML = '<div class="drawer-img-placeholder">V</div>';
+  }
+  document.getElementById('votum-panel').style.display = 'none';
+  document.getElementById('votum-loading').style.display = 'flex';
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+  analyzeArticle(article);
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+async function analyzeArticle(article) {
+  try {
+    const res = await fetch('/.netlify/functions/analyze', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title:article.title, source:article.source, description:article.description||''})
+    });
+    const analysis = await res.json();
+    renderAnalysis(analysis);
+  } catch(err) {
+    document.getElementById('votum-loading').style.display = 'none';
+  }
+}
+
+function renderAnalysis(a) {
+  document.getElementById('votum-loading').style.display = 'none';
+  document.getElementById('vp-point').textContent = a.the_point;
+  const total = a.coverage_spread.left + a.coverage_spread.center + a.coverage_spread.right;
+  document.getElementById('spread-l').style.width = (a.coverage_spread.left/total*100)+'%';
+  document.getElementById('spread-c').style.width = (a.coverage_spread.center/total*100)+'%';
+  document.getElementById('spread-r').style.width = (a.coverage_spread.right/total*100)+'%';
+  document.getElementById('spread-l-label').textContent = `Left ${a.coverage_spread.left}%`;
+  document.getElementById('spread-c-label').textContent = `Center ${a.coverage_spread.center}%`;
+  document.getElementById('spread-r-label').textContent = `Right ${a.coverage_spread.right}%`;
+  const flagsEl = document.getElementById('vp-flags');
+  flagsEl.innerHTML = '';
+  (a.flags||[]).forEach(f => {
+    const pill = document.createElement('span');
+    pill.className = `vp-flag flag-${f.type}`;
+    pill.textContent = f.label;
+    flagsEl.appendChild(pill);
+  });
+  if (!a.flags?.length) flagsEl.innerHTML = '<span class="vp-flag flag-info">No flags detected</span>';
+  const score = Math.round(a.source_score||50);
+  document.getElementById('vp-score-bar').style.width = score+'%';
+  document.getElementById('vp-score-bar').style.background = score>70?'#7A8A6A':score>45?'#BA7517':'#B94040';
+  document.getElementById('vp-score-num').textContent = score+'/100';
+  document.getElementById('vp-score-note').textContent = a.source_note||'';
+  const counterWrap = document.getElementById('vp-counter-wrap');
+  if (a.counter_story?.exists) {
+    document.getElementById('vp-counter-source').textContent = a.counter_story.source;
+    document.getElementById('vp-counter-title').textContent = a.counter_story.title;
+    counterWrap.style.display = 'flex';
+  } else { counterWrap.style.display = 'none'; }
+  document.getElementById('votum-panel').style.display = 'flex';
+}
+
+// FILTERS
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeBias = btn.dataset.bias;
+    if (selectedCountry) fetchCountryNews(selectedCountry);
+  });
+});
+
+document.querySelectorAll('.region-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.region-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    // Could zoom/filter map by region here later
+  });
+});
+
+// TOOLTIP
+const tooltip = document.getElementById('state-tooltip');
+
+function showTooltip(e, name) {
+  const c = COUNTRY_DATA[name];
+  if (!c) return;
+  document.getElementById('tt-name').textContent = name;
+  document.getElementById('tt-region').textContent = c.region;
+  document.getElementById('tt-region2').textContent = c.region;
+  document.getElementById('tt-issue').textContent = c.issue;
+  tooltip.style.display = 'block';
+  positionTooltip(e);
+}
+
+function positionTooltip(e) {
+  const tw=220, th=160, vw=window.innerWidth, vh=window.innerHeight;
+  let x = e.clientX+16, y = e.clientY-40;
+  if (x+tw>vw-10) x = e.clientX-tw-16;
+  if (y+th>vh-10) y = vh-th-10;
+  if (y<10) y=10;
+  tooltip.style.left = x+'px'; tooltip.style.top = y+'px';
+}
+
+// WORLD MAP
+async function loadWorldMap() {
+  const [topoRes, {feature}, {geoPath, geoNaturalEarth1}] = await Promise.all([
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'),
+    import('https://cdn.jsdelivr.net/npm/topojson-client@3/+esm'),
+    import('https://cdn.jsdelivr.net/npm/d3-geo@3/+esm')
+  ]);
+
+  const world = await topoRes.json();
+  const svg = document.getElementById('world-map');
+  const w = 960, h = 500;
+
+  const projection = geoNaturalEarth1().scale(153).translate([w/2, h/2]);
+  const path = geoPath().projection(projection);
+  const countries = feature(world, world.objects.countries);
+
+  // FIPS to country name mapping (subset of most important)
+  const ID_TO_NAME = {
+    4:"Afghanistan",8:"Albania",12:"Algeria",24:"Angola",32:"Argentina",
+    36:"Australia",40:"Austria",50:"Bangladesh",56:"Belgium",64:"Bolivia",
+    76:"Brazil",100:"Bulgaria",116:"Cambodia",120:"Cameroon",124:"Canada",
+    140:"Central African Republic",148:"Chad",152:"Chile",156:"China",
+    170:"Colombia",178:"Congo",188:"Costa Rica",191:"Croatia",192:"Cuba",
+    203:"Czech Republic",208:"Denmark",218:"Ecuador",818:"Egypt",
+    222:"El Salvador",231:"Ethiopia",246:"Finland",250:"France",
+    268:"Georgia",276:"Germany",288:"Ghana",300:"Greece",320:"Guatemala",
+    332:"Haiti",340:"Honduras",348:"Hungary",356:"India",360:"Indonesia",
+    364:"Iran",368:"Iraq",372:"Ireland",376:"Israel",380:"Italy",
+    388:"Jamaica",392:"Japan",400:"Jordan",398:"Kazakhstan",404:"Kenya",
+    422:"Lebanon",434:"Libya",458:"Malaysia",466:"Mali",484:"Mexico",
+    498:"Moldova",504:"Morocco",508:"Mozambique",104:"Myanmar",
+    528:"Netherlands",554:"New Zealand",558:"Nicaragua",562:"Niger",
+    566:"Nigeria",408:"North Korea",578:"Norway",586:"Pakistan",
+    275:"Palestine",591:"Panama",600:"Paraguay",604:"Peru",608:"Philippines",
+    616:"Poland",620:"Portugal",630:"Puerto Rico",642:"Romania",
+    643:"Russia",682:"Saudi Arabia",686:"Senegal",688:"Serbia",
+    694:"Sierra Leone",706:"Somalia",710:"South Africa",410:"South Korea",
+    728:"South Sudan",724:"Spain",144:"Sri Lanka",736:"Sudan",
+    752:"Sweden",756:"Switzerland",760:"Syria",158:"Taiwan",
+    764:"Thailand",788:"Tunisia",792:"Turkey",800:"Uganda",
+    804:"Ukraine",784:"United Arab Emirates",826:"United Kingdom",
+    840:"United States",858:"Uruguay",860:"Uzbekistan",862:"Venezuela",
+    704:"Vietnam",887:"Yemen",716:"Zimbabwe"
+  };
+
+  // Ocean background
+  const ocean = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  ocean.setAttribute('width', w); ocean.setAttribute('height', h);
+  ocean.setAttribute('fill', 'var(--ocean)');
+  svg.appendChild(ocean);
+
+  countries.features.forEach(f => {
+    const name = ID_TO_NAME[parseInt(f.id)];
+    const d = path(f);
+    if (!d) return;
+
+    const el = document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d', d);
+    el.setAttribute('class', 'country-path');
+    if (name) el.dataset.name = name;
+
+    if (name) {
+      el.addEventListener('mouseenter', e => showTooltip(e, name));
+      el.addEventListener('mousemove', e => positionTooltip(e));
+      el.addEventListener('mouseleave', () => { tooltip.style.display='none'; });
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.country-path').forEach(p=>p.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedCountry = name;
+        const info = COUNTRY_DATA[name];
+        document.getElementById('news-label').innerHTML =
+          `${name} <span>· ${info ? info.region : ''} · ${info ? info.issue : ''}</span>`;
+        fetchCountryNews(name);
+        tooltip.style.display='none';
+      });
+    }
+
+    svg.appendChild(el);
+  });
+}
+
+// DARK MODE
+const toggle = document.getElementById('theme-toggle');
+let dark = localStorage.getItem('votum-theme') === 'dark';
+if (dark) { document.documentElement.setAttribute('data-theme','dark'); toggle.textContent='☾'; }
+toggle.addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+  toggle.textContent = dark?'☾':'☀';
+  localStorage.setItem('votum-theme', dark?'dark':'light');
+});
+
+loadWorldMap().catch(console.error);
+</script>
+</body>
+</html>
