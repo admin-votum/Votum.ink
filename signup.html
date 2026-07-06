@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Votum Pro — Global Political Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.13);
+  --text: #1A1A18; --muted: #6B6B65; --ink: #1A1A18;
+  --dem: #3A6B9E; --rep: #B94040;
+  --gold: #C4A882; --gold-light: #E8D5A3;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  border-bottom: 0.5px solid var(--border2);
+  background: var(--surface); flex-shrink: 0;
+}
+.wordmark {
+  font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 500;
+  color: var(--ink); display: flex; align-items: baseline; gap: 8px; text-decoration: none;
+}
+.wordmark-dot { width:5px; height:5px; border-radius:50%; background:var(--ink); margin-bottom:2px; flex-shrink:0; }
+.wordmark-sub { font-family:'Inter',sans-serif; font-size:11px; font-weight:300; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+.nav-links { display:flex; gap:20px; align-items:center; }
+.nav-link { font-size:12px; color:var(--muted); letter-spacing:0.04em; text-decoration:none; transition:color 0.15s; }
+.nav-link:hover { color:var(--text); }
+
+/* HERO */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 28px 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background world map suggestion */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 50% 60%, rgba(168,196,212,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.pro-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 20px;
+  padding: 4px 14px;
+  border: 0.5px solid var(--border2);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.pro-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #C4A882, #8A6A2A);
+}
+
+.hero-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 54px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+  max-width: 640px;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--muted);
+}
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 460px;
+  margin-bottom: 48px;
+}
+
+/* PRICING CARD */
+.pricing-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.plan-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 280px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.plan-card.featured {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(196,168,130,0.3), 0 8px 32px rgba(0,0,0,0.08);
+}
+
+.plan-name {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.plan-name.pro-name {
+  background: linear-gradient(135deg, #C4A882, #8A6A2A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.plan-price {
+  font-family: 'EB Garamond', serif;
+  font-size: 42px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+
+.plan-price span {
+  font-size: 16px;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+}
+
+.plan-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.plan-features {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: 1;
+}
+
+.plan-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.feature-check {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.check-free { background: var(--surface2); color: var(--muted); }
+.check-pro { background: linear-gradient(135deg, #C4A882, #8A6A2A); color: white; }
+
+.plan-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: opacity 0.15s;
+  border: none;
+  margin-top: 4px;
+}
+
+.btn-free {
+  background: var(--surface2);
+  color: var(--muted);
+  border: 0.5px solid var(--border2);
+}
+
+.btn-free:hover { opacity: 0.8; }
+
+.btn-pro {
+  background: linear-gradient(135deg, #2C2C28, #4A4A44);
+  color: var(--gold-light);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.btn-pro:hover { opacity: 0.88; }
+
+/* SIGNUP FORM */
+.signup-form-wrap {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 400px;
+  text-align: left;
+  display: none;
+}
+
+.signup-form-wrap.visible { display: block; }
+
+.form-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.form-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.form-input {
+  background: var(--surface2);
+  border: 0.5px solid var(--border2);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus { border-color: var(--gold); }
+
+.form-submit {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #2C2C28, #4A4A44);
+  color: var(--gold-light);
+  border: none;
+  border-radius: 7px;
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-top: 6px;
+}
+
+.form-submit:hover { opacity: 0.88; }
+
+.form-note {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* FEATURES GRID */
+.features-section {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 60px 28px 80px;
+}
+
+.features-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 10px;
+}
+
+.feature-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.feature-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.feature-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* FOOTER */
+.page-footer {
+  border-top: 0.5px solid var(--border2);
+  padding: 20px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-link {
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.15s;
+}
+
+.footer-link:hover { color: var(--text); }
+
+/* SUCCESS STATE */
+.success-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+}
+
+.success-state.visible { display: flex; }
+
+.success-glyph {
+  font-family: 'EB Garamond', serif;
+  font-size: 42px;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.success-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.success-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 280px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="wordmark" href="index.html">
+    Votum <div class="wordmark-dot"></div> <span class="wordmark-sub">ink</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Map</a>
+    <a class="nav-link" href="the-point.html">The Point</a>
+    <a class="nav-link" href="polls.html">Polls</a>
+    <a class="nav-link" href="about.html">About</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+
+  <div class="pro-eyebrow">
+    <div class="pro-dot"></div>
+    Votum Pro
+  </div>
+
+  <div class="hero-title">
+    Bias-free global<br><em>political intelligence.</em>
+  </div>
+
+  <div class="hero-sub">
+    The world map. Every country. Every story. Analyzed, labeled, and distilled — without agenda, without noise.
+  </div>
+
+  <div class="pricing-wrap">
+    <!-- FREE -->
+    <div class="plan-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0 <span>/ month</span></div>
+      <div class="plan-desc">Full access to U.S. political intelligence — the map, the news, the polls, The Point.</div>
+      <div class="plan-features">
+        <div class="plan-feature"><div class="feature-check check-free">✓</div>Interactive U.S. electoral map</div>
+        <div class="plan-feature"><div class="feature-check check-free">✓</div>Live news feed — all 50 states</div>
+        <div class="plan-feature"><div class="feature-check check-free">✓</div>The Point — AI article distillation</div>
+        <div class="plan-feature"><div class="feature-check check-free">✓</div>Source bias labeling</div>
+        <div class="plan-feature"><div class="feature-check check-free">✓</div>2026 Senate race tracker</div>
+        <div class="plan-feature"><div class="feature-check check-free">✓</div>No ads. Ever.</div>
+      </div>
+      <a href="index.html" class="plan-btn btn-free">Go to map →</a>
+    </div>
+
+    <!-- PRO -->
+    <div class="plan-card featured">
+      <div class="plan-name pro-name">Pro</div>
+      <div class="plan-price">$7 <span>/ month</span></div>
+      <div class="plan-desc">Everything in Free, plus the world. 190 countries, global coverage, cross-border intelligence.</div>
+      <div class="plan-features">
+        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Everything in Free</div>
+        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Interactive world map — 190 countries</div>
+        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Global news feed per country</div>
+        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Cross-border coverage analysis</div>
+        <div class="plan-feature"><div class="feature-check check-pro">✓</div>The Point — global edition</div>
+        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Daily email digest</div>
+        <div class="plan-feature"><div class="feature-check check-pro">✓</div>Issues deep dive — global topics</div>
+      </div>
+      <button class="plan-btn btn-pro" onclick="showSignup()">Get Pro — $7/month</button>
+    </div>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <div class="signup-form-wrap" id="signup-form">
+    <div id="form-content">
+      <div class="form-title">Join Votum Pro</div>
+      <div class="form-sub">Enter your email to get started. Payment processing coming shortly — early signups get first access and founding member pricing locked in.</div>
+      <div class="form-group">
+        <div class="form-label">Email</div>
+        <input type="email" class="form-input" id="email-input" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Name</div>
+        <input type="text" class="form-input" id="name-input" placeholder="Your name">
+      </div>
+      <button class="form-submit" onclick="submitSignup()">Reserve my spot →</button>
+      <div class="form-note">No payment required yet. We'll reach out at hello@votum.ink when Pro launches. Cancel anytime.</div>
+    </div>
+    <div class="success-state" id="success-state">
+      <div class="success-glyph">V</div>
+      <div class="success-title">You're on the list.</div>
+      <div class="success-sub">We'll reach out at your email when Pro launches. Thank you for believing in bias-free intelligence.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features-section">
+  <div class="features-label">What makes Votum different</div>
+  <div class="features-grid">
+    <div class="feature-item">
+      <div class="feature-icon">🗺</div>
+      <div class="feature-title">The world map</div>
+      <div class="feature-desc">190 countries, clickable. Every country surfaces its own news feed, sourced globally and labeled by lean.</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">The Point</div>
+      <div class="feature-desc">Every article reduced to one true sentence. The actual news, stripped of scaffolding and bait.</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">⚖</div>
+      <div class="feature-title">No editorial lean</div>
+      <div class="feature-desc">Sources labeled transparently across the full spectrum. Left, center, right — you see all of it, you decide.</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">↔</div>
+      <div class="feature-title">Counter stories</div>
+      <div class="feature-desc">Every article surfaces the opposing perspective. Completeness is the standard, not engagement.</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Coverage spread</div>
+      <div class="feature-desc">See which side of the spectrum is covering a story — and which side is ignoring it. The gap is the signal.</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">✉</div>
+      <div class="feature-title">Daily digest</div>
+      <div class="feature-desc">The Point, delivered to your inbox every morning. 60 seconds. What actually happened, globally.</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-footer">
+  <div class="footer-copy">© 2026 Votum.ink — Bias-free global political intelligence</div>
+  <div class="footer-links">
+    <a class="footer-link" href="about.html">About</a>
+    <a class="footer-link" href="mailto:hello@votum.ink">Contact</a>
+  </div>
+</div>
+
+<script>
+function showSignup() {
+  const form = document.getElementById('signup-form');
+  form.classList.add('visible');
+  form.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+async function submitSignup() {
+  const email = document.getElementById('email-input').value.trim();
+  const name = document.getElementById('name-input').value.trim();
+
+  if (!email || !email.includes('@')) {
+    document.getElementById('email-input').style.borderColor = '#B94040';
+    return;
+  }
+
+  // Store in localStorage for now — Supabase integration coming
+  const signups = JSON.parse(localStorage.getItem('votum-signups') || '[]');
+  signups.push({email, name, date: new Date().toISOString(), plan:'pro'});
+  localStorage.setItem('votum-signups', JSON.stringify(signups));
+
+  // Show success
+  document.getElementById('form-content').style.display = 'none';
+  document.getElementById('success-state').classList.add('visible');
+}
+</script>
+</body>
+</html>
