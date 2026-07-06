@@ -378,14 +378,19 @@ header {
 </div>
 
 <script>
+// About page always renders in light mode — long form reading is cleaner on parchment
+document.documentElement.setAttribute('data-theme', 'light');
+localStorage.setItem('votum-theme', 'light');
+
+// Keep toggle functional but start always light
 const toggle = document.getElementById('theme-toggle');
-let dark = localStorage.getItem('votum-theme') === 'dark';
-if (dark) { document.documentElement.setAttribute('data-theme','dark'); toggle.textContent='☾'; }
+let dark = false;
+toggle.textContent = '☀';
 toggle.addEventListener('click', () => {
   dark = !dark;
-  document.documentElement.setAttribute('data-theme', dark?'dark':'light');
-  toggle.textContent = dark?'☾':'☀';
-  localStorage.setItem('votum-theme', dark?'dark':'light');
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  toggle.textContent = dark ? '☾' : '☀';
+  localStorage.setItem('votum-theme', dark ? 'dark' : 'light');
 });
 </script>
 </body>
