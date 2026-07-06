@@ -1,60 +1,101 @@
-// Source reach database — monthly unique readers (millions)
-// Used to rank articles by outlet credibility and reach
-const SOURCE_REACH = {
-  // Tier 1 — 100M+ monthly readers
-  'reuters': 185, 'ap': 175, 'associated press': 175,
-  'new york times': 150, 'nytimes': 150,
-  'bbc': 140, 'bbc news': 140,
-  'cnn': 130, 'washington post': 100,
-  'fox news': 100, 'foxnews': 100,
-
-  // Tier 2 — 50M+
-  'bloomberg': 90, 'usa today': 80,
-  'the guardian': 75, 'guardian': 75,
-  'nbcnews': 70, 'nbc news': 70,
-  'abc news': 65, 'abcnews': 65,
-  'cbsnews': 60, 'cbs news': 60,
-  'msnbc': 55, 'time': 55,
-  'newsweek': 52, 'huffpost': 50,
-
-  // Tier 3 — 20M+
-  'politico': 45, 'axios': 40,
-  'npr': 38, 'the hill': 35,
-  'forbes': 70, 'business insider': 40,
-  'vox': 25, 'slate': 22,
-  'the atlantic': 20, 'atlantic': 20,
-
-  // Tier 4 — 5M+
-  'national review': 15, 'the dispatch': 8,
-  'reason': 6, 'daily wire': 18,
-  'new york post': 45, 'nypost': 45,
-  'breitbart': 12, 'the federalist': 5,
-  'wall street journal': 40, 'wsj': 40,
-  'daily beast': 12, 'mother jones': 8,
-  'the intercept': 6, 'jacobin': 5,
-
-  // Tier 5 — Local/Regional
-  'atlanta journal': 8, 'ajc': 8,
-  'miami herald': 6, 'dallas morning': 5,
-  'chicago tribune': 8, 'la times': 20,
-  'los angeles times': 20, 'boston globe': 8,
-  'philadelphia inquirer': 5, 'arizona republic': 4,
-  'detroit free press': 4, 'minneapolis star': 3,
-  'arizona capitol times': 2, 'capitol times': 2,
-  'florida phoenix': 2, 'michigan advance': 2,
-  'georgia recorder': 2, 'nevada current': 2,
-  'pennsylvania capital': 2, 'wisconsin examiner': 2,
-  'colorado sun': 2, 'minnesota reformer': 2,
-  'north carolina health': 2, 'virginia mercury': 2,
-};
+// Source reach scoring — monthly unique readers (millions)
+// Handled inside getReach() function below
 
 function getReach(sourceName) {
   if (!sourceName) return 1;
-  const n = sourceName.toLowerCase();
-  for (const [key, reach] of Object.entries(SOURCE_REACH)) {
-    if (n.includes(key)) return reach;
+  const n = sourceName.toLowerCase().trim();
+
+  // Exact or starts-with matches first to avoid false positives
+  const exactMatches = {
+    'reuters': 185,
+    'associated press': 175,
+    'ap news': 175,
+    'the new york times': 150,
+    'new york times': 150,
+    'nytimes': 150,
+    'bbc news': 140,
+    'bbc': 140,
+    'cnn': 130,
+    'the washington post': 100,
+    'washington post': 100,
+    'fox news': 100,
+    'bloomberg': 90,
+    'usa today': 80,
+    'the guardian': 75,
+    'guardian': 75,
+    'nbc news': 70,
+    'abc news': 65,
+    'cbs news': 60,
+    'msnbc': 55,
+    'time': 55,
+    'newsweek': 52,
+    'huffpost': 50,
+    'politico': 45,
+    'new york post': 45,
+    'wall street journal': 40,
+    'axios': 40,
+    'npr': 38,
+    'the hill': 35,
+    'forbes': 70,
+    'business insider': 40,
+    'vox': 25,
+    'slate': 22,
+    'the atlantic': 20,
+    'atlantic': 20,
+    'national review': 15,
+    'daily wire': 18,
+    'breitbart': 12,
+    'daily beast': 12,
+    'the dispatch': 8,
+    'mother jones': 8,
+    'the intercept': 6,
+    'reason': 6,
+    'jacobin': 5,
+    'the federalist': 5,
+    'los angeles times': 20,
+    'la times': 20,
+    'chicago tribune': 8,
+    'boston globe': 8,
+    'miami herald': 6,
+    'philadelphia inquirer': 5,
+    'arizona republic': 4,
+    'dallas morning news': 5,
+    'detroit free press': 4,
+    'minneapolis star tribune': 3,
+    'atlanta journal-constitution': 8,
+    'ajc': 8,
+    'headtopics': 2,
+    'nogales international': 2,
+    'arizona capitol times': 2,
+    'azcapitoltimes': 2,
+    'east valley tribune': 2,
+    'eastvalleytribune': 2,
+    'standard speaker': 2,
+    'martinsvillebulletin': 2,
+    'florida phoenix': 2,
+    'michigan advance': 2,
+    'georgia recorder': 2,
+    'nevada current': 2,
+    'wisconsin examiner': 2,
+    'colorado sun': 2,
+    'minnesota reformer': 2,
+    'virginia mercury': 2,
+    'u.s. news': 15,
+    'us news': 15,
+    'usnews': 15,
+    'usatoday': 80,
+    'headtopics.com': 2,
+  };
+
+  // Check exact match first
+  if (exactMatches[n]) return exactMatches[n];
+
+  // Then check if source contains a key (for domain variations)
+  for (const [key, reach] of Object.entries(exactMatches)) {
+    if (key.length > 4 && n.includes(key)) return reach;
   }
-  return 2; // Unknown source — low but not zero
+
+  return 2; // Unknown — low reach
 }
 
 function rankScore(article) {
