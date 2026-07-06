@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Point — Votum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.13);
+  --text: #1A1A18; --muted: #6B6B65; --ink: #1A1A18;
+  --dem: #3A6B9E; --rep: #B94040; --swing: #7A7040;
+}
+[data-theme="dark"] {
+  --bg: #0E0E0C; --surface: #161614; --surface2: #1E1E1B;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.11);
+  --text: #EDEAE2; --muted: #7A7A72; --ink: #EDEAE2;
+  --dem: #4A86BF; --rep: #C9534F;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; display: flex; flex-direction: column;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* HEADER */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  border-bottom: 0.5px solid var(--border2);
+  background: var(--surface); flex-shrink: 0;
+  position: sticky; top: 0; z-index: 100;
+  transition: background 0.3s;
+}
+.wordmark {
+  font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 500;
+  color: var(--ink); display: flex; align-items: baseline; gap: 8px; text-decoration: none;
+}
+.wordmark-dot { width:5px; height:5px; border-radius:50%; background:var(--ink); margin-bottom:2px; flex-shrink:0; }
+.wordmark-sub { font-family:'Inter',sans-serif; font-size:11px; font-weight:300; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+.nav-links { display:flex; gap:20px; align-items:center; }
+.nav-link { font-size:12px; color:var(--muted); letter-spacing:0.04em; cursor:pointer; text-decoration:none; transition:color 0.15s; }
+.nav-link:hover { color:var(--text); }
+.nav-link.active { color:var(--text); border-bottom:1px solid var(--border2); padding-bottom:1px; }
+.theme-toggle {
+  background:none; border:0.5px solid var(--border2); color:var(--muted);
+  width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.2s; margin-left:8px;
+}
+.theme-toggle:hover { color:var(--text); border-color:var(--text); }
+
+/* HERO */
+.page-hero { padding:48px 28px 28px; max-width:800px; margin:0 auto; width:100%; }
+.page-hero-label { font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--muted); margin-bottom:10px; }
+.page-hero-title { font-family:'EB Garamond',serif; font-size:38px; font-weight:500; line-height:1.15; color:var(--text); margin-bottom:10px; }
+.page-hero-sub { font-size:14px; color:var(--muted); line-height:1.6; max-width:520px; }
+
+/* CONTROLS */
+.controls {
+  padding:0 28px 24px; max-width:800px; margin:0 auto; width:100%;
+  display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+}
+.control-label { font-size:11px; color:var(--muted); letter-spacing:0.04em; margin-right:2px; }
+.pill-btn {
+  background:none; border:0.5px solid var(--border2); color:var(--muted);
+  font-size:11px; font-family:'Inter',sans-serif; padding:4px 13px;
+  border-radius:20px; cursor:pointer; letter-spacing:0.04em; transition:all 0.15s;
+}
+.pill-btn:hover { color:var(--text); border-color:var(--text); }
+.pill-btn.active { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.divider-dot { width:3px; height:3px; border-radius:50%; background:var(--border2); margin:0 4px; }
+
+/* STATE FILTER ROW */
+.state-filter-row {
+  padding:0 28px 20px; max-width:800px; margin:0 auto; width:100%;
+  display:flex; gap:5px; flex-wrap:wrap; align-items:center;
+}
+
+/* FEED */
+.point-feed { max-width:800px; margin:0 auto; width:100%; padding:0 28px 80px; display:flex; flex-direction:column; gap:0; }
+
+/* POINT ITEM — image left, content right */
+.point-item {
+  padding:20px 0;
+  border-bottom:0.5px solid var(--border);
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:0 20px;
+  transition:background 0.12s;
+}
+.point-item:first-child { border-top:0.5px solid var(--border); }
+.point-item:hover { background:var(--surface2); margin:0 -12px; padding:20px 12px; border-radius:8px; border-bottom-color:transparent; }
+
+/* IMAGE COLUMN */
+.point-img-wrap {
+  display:flex; flex-direction:column; gap:8px; padding-top:2px;
+}
+.point-img {
+  width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:6px;
+  background:var(--surface2); display:block;
+}
+.point-img-placeholder {
+  width:100%; aspect-ratio:4/3; border-radius:6px;
+  background:var(--surface2); display:flex; align-items:center; justify-content:center;
+  font-family:'EB Garamond',serif; font-size:24px; color:var(--muted); opacity:0.25;
+}
+.point-state { font-family:'EB Garamond',serif; font-size:14px; font-weight:500; color:var(--text); }
+.point-time { font-size:10px; color:var(--muted); letter-spacing:0.04em; }
+
+/* CONTENT COLUMN */
+.point-right { display:flex; flex-direction:column; gap:7px; }
+.point-source-row { display:flex; align-items:center; gap:5px; }
+.bias-pip { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.pip-left { background:#3A6B9E; }
+.pip-center-left { background:#7A9FBF; }
+.pip-center { background:#7A8A6A; }
+.pip-center-right { background:#BF9A6A; }
+.pip-right { background:#B94040; }
+.point-source-name { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); }
+
+.point-original { font-size:12px; color:var(--muted); line-height:1.45; font-style:italic; }
+.point-text { font-family:'EB Garamond',serif; font-size:19px; line-height:1.45; color:var(--text); font-weight:400; }
+
+/* METRICS ROW */
+.point-metrics {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:2px;
+}
+
+.coverage-badge {
+  display:flex; align-items:center; gap:5px;
+  font-size:10px; color:var(--muted); letter-spacing:0.04em;
+}
+.coverage-pips { display:flex; gap:2px; }
+.coverage-pip {
+  width:5px; height:5px; border-radius:50%;
+  background:var(--border2);
+}
+.coverage-pip.active-l { background:#3A6B9E; }
+.coverage-pip.active-c { background:#7A8A6A; }
+.coverage-pip.active-r { background:#B94040; }
+
+/* SCORE BADGE */
+.score-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; padding:2px 8px; border-radius:20px;
+  border:0.5px solid; letter-spacing:0.04em;
+}
+.score-high { background:rgba(90,130,80,0.1); color:#3A7030; border-color:rgba(90,130,80,0.25); }
+.score-mid  { background:rgba(186,112,0,0.1); color:#8A5500; border-color:rgba(186,112,0,0.25); }
+.score-low  { background:rgba(160,40,40,0.1); color:#8A2020; border-color:rgba(160,40,40,0.25); }
+[data-theme="dark"] .score-high { background:rgba(90,160,70,0.15); color:#7ACA60; border-color:rgba(90,160,70,0.3); }
+[data-theme="dark"] .score-mid  { background:rgba(186,112,0,0.15); color:#D4922A; border-color:rgba(186,112,0,0.3); }
+[data-theme="dark"] .score-low  { background:rgba(160,40,40,0.15); color:#E06060; border-color:rgba(160,40,40,0.3); }
+
+.point-flags { display:flex; flex-wrap:wrap; gap:4px; }
+.point-flag { font-size:10px; padding:2px 8px; border-radius:20px; border:0.5px solid; letter-spacing:0.02em; }
+.flag-caution { background:rgba(186,112,0,0.08); color:#8A5500; border-color:rgba(186,112,0,0.2); }
+.flag-info    { background:rgba(58,107,158,0.08); color:#2A5A8A; border-color:rgba(58,107,158,0.2); }
+.flag-warn    { background:rgba(160,40,40,0.08); color:#8A2020; border-color:rgba(160,40,40,0.2); }
+[data-theme="dark"] .flag-caution { background:rgba(186,112,0,0.15); color:#D4922A; border-color:rgba(186,112,0,0.3); }
+[data-theme="dark"] .flag-info    { background:rgba(58,107,158,0.15); color:#6AABE0; border-color:rgba(58,107,158,0.3); }
+[data-theme="dark"] .flag-warn    { background:rgba(160,40,40,0.15); color:#E06060; border-color:rgba(160,40,40,0.3); }
+
+.point-read {
+  font-size:11px; color:var(--muted); text-decoration:none; letter-spacing:0.04em;
+  display:inline-flex; align-items:center; gap:4px; transition:color 0.15s; margin-top:1px;
+}
+.point-read:hover { color:var(--text); }
+
+/* SKELETON */
+.skeleton-item {
+  padding:20px 0; border-bottom:0.5px solid var(--border);
+  display:grid; grid-template-columns:120px 1fr; gap:0 20px;
+}
+.skel { height:12px; border-radius:4px; background:var(--surface2); animation:skel-pulse 1.4s ease-in-out infinite; margin-bottom:8px; }
+.skel-img { height:90px; border-radius:6px; background:var(--surface2); animation:skel-pulse 1.4s ease-in-out infinite; margin-bottom:8px; }
+@keyframes skel-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+.empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+.empty-glyph { font-family:'EB Garamond',serif; font-size:48px; opacity:0.15; margin-bottom:12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="wordmark" href="index.html">
+    Votum <div class="wordmark-dot"></div> <span class="wordmark-sub">ink</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Map</a>
+    <a class="nav-link active" href="the-point.html">The Point</a>
+    <a class="nav-link" href="#">Polls</a>
+    <a class="nav-link" href="#">Issues</a>
+    <a class="nav-link" href="#">About</a>
+    <button class="theme-toggle" id="theme-toggle">☀</button>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="page-hero-label">Votum · The Point</div>
+  <div class="page-hero-title">What actually happened.</div>
+  <div class="page-hero-sub">Every article reduced to its single true sentence. No scaffolding. No bait. Sorted by source credibility — highest first.</div>
+</div>
+
+<div class="controls">
+  <span class="control-label">Source</span>
+  <button class="pill-btn active" data-bias="all">All</button>
+  <button class="pill-btn" data-bias="left">Left</button>
+  <button class="pill-btn" data-bias="center">Center</button>
+  <button class="pill-btn" data-bias="right">Right</button>
+  <div class="divider-dot"></div>
+  <span class="control-label">Sort</span>
+  <button class="pill-btn active" data-sort="score">Score ↓</button>
+  <button class="pill-btn" data-sort="fresh">Freshest</button>
+  <div class="divider-dot"></div>
+  <button class="pill-btn" id="refresh-btn">↻ Refresh</button>
+</div>
+
+<div class="state-filter-row" id="state-filter-row">
+  <span class="control-label">State</span>
+  <button class="pill-btn active" data-state="all">All</button>
+</div>
+
+<div class="point-feed" id="point-feed">
+  <div class="skeleton-item"><div><div class="skel-img"></div><div class="skel" style="width:55px"></div></div><div><div class="skel" style="width:90%"></div><div class="skel" style="width:75%;height:16px;animation-delay:0.1s"></div><div class="skel" style="width:50%;animation-delay:0.2s"></div></div></div>
+  <div class="skeleton-item"><div><div class="skel-img" style="animation-delay:0.1s"></div><div class="skel" style="width:65px;animation-delay:0.1s"></div></div><div><div class="skel" style="width:85%;animation-delay:0.1s"></div><div class="skel" style="width:80%;height:16px;animation-delay:0.2s"></div><div class="skel" style="width:45%;animation-delay:0.3s"></div></div></div>
+  <div class="skeleton-item"><div><div class="skel-img" style="animation-delay:0.2s"></div><div class="skel" style="width:50px;animation-delay:0.2s"></div></div><div><div class="skel" style="width:92%;animation-delay:0.2s"></div><div class="skel" style="width:70%;height:16px;animation-delay:0.3s"></div><div class="skel" style="width:55%;animation-delay:0.1s"></div></div></div>
+  <div class="skeleton-item"><div><div class="skel-img" style="animation-delay:0.15s"></div><div class="skel" style="width:60px;animation-delay:0.15s"></div></div><div><div class="skel" style="width:88%;animation-delay:0.15s"></div><div class="skel" style="width:77%;height:16px;animation-delay:0.25s"></div><div class="skel" style="width:48%;animation-delay:0.35s"></div></div></div>
+  <div class="skeleton-item"><div><div class="skel-img" style="animation-delay:0.3s"></div><div class="skel" style="width:70px;animation-delay:0.3s"></div></div><div><div class="skel" style="width:94%;animation-delay:0.3s"></div><div class="skel" style="width:68%;height:16px;animation-delay:0.1s"></div><div class="skel" style="width:52%;animation-delay:0.2s"></div></div></div>
+</div>
+
+<script>
+// All API calls go through secure Netlify functions — no keys in browser
+
+const SWING_STATES = ['Arizona','Georgia','Michigan','Nevada','North Carolina','Pennsylvania','Wisconsin'];
+const KEY_STATES   = ['California','Texas','Florida','New York','Ohio','Virginia','Colorado','Minnesota'];
+const ALL_STATES   = [...SWING_STATES, ...KEY_STATES];
+
+const BIAS_MAP = {
+  all:['left','center-left','center','center-right','right'],
+  left:['left','center-left'], center:['center'], right:['right','center-right']
+};
+
+let activeBias  = 'all';
+let activeState = 'all';
+let activeSort  = 'score';
+let renderedItems = [];
+
+function guessBias(n='') {
+  n = n.toLowerCase();
+  if (['fox news','breitbart','national review','new york post','daily wire','the federalist'].some(s=>n.includes(s))) return {bias:'right',pip:'pip-right'};
+  if (['wall street journal','dispatch','reason','free beacon'].some(s=>n.includes(s))) return {bias:'center-right',pip:'pip-center-right'};
+  if (['new york times','washington post','msnbc','atlantic','guardian','vox','slate','huffpost'].some(s=>n.includes(s))) return {bias:'left',pip:'pip-left'};
+  if (['npr','axios','politico','the hill','bloomberg','time','usa today'].some(s=>n.includes(s))) return {bias:'center-left',pip:'pip-center-left'};
+  return {bias:'center',pip:'pip-center'};
+}
+
+function timeAgoFromDate(d) {
+  if (!d) return '—';
+  const diff = Math.floor((Date.now()-new Date(d))/60000);
+  if (diff<60) return `${diff}m ago`;
+  if (diff<1440) return `${Math.floor(diff/60)}h ago`;
+  return `${Math.floor(diff/1440)}d ago`;
+}
+
+function scoreColor(s) {
+  if (s>=70) return 'score-high';
+  if (s>=45) return 'score-mid';
+  return 'score-low';
+}
+
+function scoreLabel(s) { return `● ${s}/100`; }
+
+async function fetchStateNews(stateName) {
+  try {
+    const res = await fetch(`/.netlify/functions/news?state=${encodeURIComponent(stateName)}&max=3`);
+    const data = await res.json();
+    return (data.articles||[]).map(a => ({ ...a, state: stateName }));
+  } catch(e) { return []; }
+}
+
+async function analyzeForPoint(article) {
+  try {
+    const res = await fetch('/.netlify/functions/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: article.title,
+        source: article.source,
+        description: article.description || ''
+      })
+    });
+    return await res.json();
+  } catch(e) {
+    return { the_point: article.description || article.title, source_score: 50, coverage_spread: {left:33,center:34,right:33}, flags: [] };
+  }
+}
+
+function coveragePips(spread) {
+  const pips = [];
+  if (spread.left>10)   pips.push(`<div class="coverage-pip active-l"></div>`);
+  else                  pips.push(`<div class="coverage-pip"></div>`);
+  if (spread.center>10) pips.push(`<div class="coverage-pip active-c"></div>`);
+  else                  pips.push(`<div class="coverage-pip"></div>`);
+  if (spread.right>10)  pips.push(`<div class="coverage-pip active-r"></div>`);
+  else                  pips.push(`<div class="coverage-pip"></div>`);
+  return pips.join('');
+}
+
+function reprintBadge(count) {
+  if (!count || count < 2) return '';
+  const label = count >= 20 ? `↻ ${count}+ outlets` : `↻ ${count} outlets`;
+  const cls = count >= 10 ? 'flag-info' : '';
+  return `<span class="coverage-badge" style="gap:4px">${label}</span>`;
+}
+
+function renderPointItem(article, analysis) {
+  const src = guessBias(article.source);
+  const score = Math.round(analysis.source_score||50);
+  const spread = analysis.coverage_spread||{left:33,center:34,right:33};
+  const flagsHtml = (analysis.flags||[]).map(f=>`<span class="point-flag flag-${f.type}">${f.label}</span>`).join('');
+
+  const item = document.createElement('div');
+  item.className = 'point-item';
+  item.dataset.bias  = src.bias;
+  item.dataset.state = article.state;
+  item.dataset.score = score;
+  item.dataset.published = article.publishedAt||'';
+
+  item.innerHTML = `
+    <div class="point-img-wrap">
+      ${article.image
+        ? `<img class="point-img" src="${article.image}" alt="" loading="lazy" onerror="this.outerHTML='<div class=point-img-placeholder>V</div>'">`
+        : `<div class="point-img-placeholder">V</div>`}
+      <div class="point-state">${article.state}</div>
+      <div class="point-time">${timeAgoFromDate(article.publishedAt)}</div>
+    </div>
+    <div class="point-right">
+      <div class="point-source-row">
+        <div class="bias-pip ${src.pip}"></div>
+        <span class="point-source-name">${article.source}</span>
+      </div>
+      <div class="point-original">${article.title}</div>
+      <div class="point-text">${analysis.the_point}</div>
+      <div class="point-metrics">
+        <span class="score-badge ${scoreColor(score)}">${scoreLabel(score)}</span>
+        <div class="coverage-badge">
+          <div class="coverage-pips">${coveragePips(spread)}</div>
+          <span>L·C·R coverage</span>
+        </div>
+        ${reprintBadge(article.reprintCount||0)}
+        ${flagsHtml ? `<div class="point-flags">${flagsHtml}</div>` : ''}
+      </div>
+      <a class="point-read" href="${article.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read full article ↗</a>
+    </div>
+  `;
+
+  return {el:item, score, publishedAt:article.publishedAt||'', state:article.state, bias:src.bias};
+}
+
+function applyFilters() {
+  // Filter
+  renderedItems.forEach(({el,bias,state}) => {
+    const biasOk  = BIAS_MAP[activeBias].includes(bias);
+    const stateOk = activeState==='all' || state===activeState;
+    el.style.display = (biasOk && stateOk) ? '' : 'none';
+  });
+
+  // Sort visible items
+  const feed = document.getElementById('point-feed');
+  const visible = renderedItems.filter(({el}) => el.style.display !== 'none');
+  visible.sort((a,b) => activeSort==='score'
+    ? b.score - a.score
+    : new Date(b.publishedAt) - new Date(a.publishedAt)
+  );
+  visible.forEach(({el}) => feed.appendChild(el));
+}
+
+function buildStateFilter(states) {
+  const row = document.getElementById('state-filter-row');
+  states.forEach(state => {
+    const btn = document.createElement('button');
+    btn.className = 'pill-btn';
+    btn.dataset.state = state;
+    btn.textContent = state;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-state]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeState = state;
+      applyFilters();
+    });
+    row.appendChild(btn);
+  });
+
+  // All states button
+  row.querySelector('[data-state="all"]').addEventListener('click', () => {
+    document.querySelectorAll('[data-state]').forEach(b=>b.classList.remove('active'));
+    row.querySelector('[data-state="all"]').classList.add('active');
+    activeState = 'all';
+    applyFilters();
+  });
+}
+
+async function loadFeed() {
+  const feed = document.getElementById('point-feed');
+  renderedItems = [];
+
+  const batches = await Promise.all(ALL_STATES.map(fetchStateNews));
+  const allArticles = batches.flat().filter(a=>a.title);
+
+  // Dedupe
+  const seen = new Set();
+  const deduped = allArticles.filter(a => {
+    const key = a.title.slice(0,40).toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  feed.innerHTML = '';
+
+  if (!deduped.length) {
+    feed.innerHTML = '<div class="empty-state"><div class="empty-glyph">V</div><p>No articles found</p></div>';
+    return;
+  }
+
+  buildStateFilter(ALL_STATES);
+
+  // Analyze each — render skeleton, replace when done
+  deduped.slice(0,16).forEach(article => {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'skeleton-item';
+    placeholder.innerHTML = `<div><div class="skel-img"></div><div class="skel" style="width:55px"></div></div><div><div class="skel" style="width:90%"></div><div class="skel" style="width:72%;height:16px;animation-delay:0.1s"></div><div class="skel" style="width:48%;animation-delay:0.2s"></div></div>`;
+    feed.appendChild(placeholder);
+
+    analyzeForPoint(article).then(analysis => {
+      const result = renderPointItem(article, analysis);
+      renderedItems.push(result);
+      placeholder.replaceWith(result.el);
+      applyFilters();
+    });
+  });
+}
+
+// BIAS filter
+document.querySelectorAll('[data-bias]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-bias]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeBias = btn.dataset.bias;
+    applyFilters();
+  });
+});
+
+// SORT
+document.querySelectorAll('[data-sort]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-sort]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeSort = btn.dataset.sort;
+    applyFilters();
+  });
+});
+
+// REFRESH
+document.getElementById('refresh-btn').addEventListener('click', () => {
+  document.getElementById('point-feed').innerHTML = '';
+  document.getElementById('state-filter-row').innerHTML = '<span class="control-label">State</span><button class="pill-btn active" data-state="all">All</button>';
+  loadFeed();
+});
+
+// DARK MODE
+const toggle = document.getElementById('theme-toggle');
+let dark = localStorage.getItem('votum-theme')==='dark';
+if (dark) { document.documentElement.setAttribute('data-theme','dark'); toggle.textContent='☾'; }
+toggle.addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+  toggle.textContent = dark?'☾':'☀';
+  localStorage.setItem('votum-theme', dark?'dark':'light');
+});
+
+loadFeed();
+</script>
+</body>
+</html>

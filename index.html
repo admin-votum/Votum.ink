@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Votum — U.S. Political Climate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --rep: #B94040;
+  --dem: #3A6B9E;
+  --swing: #7A7040;
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.13);
+  --text: #1A1A18;
+  --muted: #6B6B65;
+  --ink: #1A1A18;
+  --map-stroke: #F7F5F0;
+  --tooltip-shadow: rgba(0,0,0,0.10);
+  --toggle-icon: '☀';
+}
+
+[data-theme="dark"] {
+  --bg: #0E0E0C;
+  --surface: #161614;
+  --surface2: #1E1E1B;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --text: #EDEAE2;
+  --muted: #7A7A72;
+  --ink: #EDEAE2;
+  --map-stroke: #0E0E0C;
+  --tooltip-shadow: rgba(0,0,0,0.50);
+  --rep: #C9534F;
+  --dem: #4A86BF;
+  --swing: #9A9050;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 52px;
+  border-bottom: 0.5px solid var(--border2);
+  background: var(--surface);
+  flex-shrink: 0;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.wordmark {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  transition: color 0.3s ease;
+}
+
+.wordmark-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink);
+  margin-bottom: 2px;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+
+.wordmark-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ev-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.midterm-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-right: 14px;
+  border-right: 0.5px solid var(--border2);
+}
+
+.chamber-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.chamber-name {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-align: center;
+}
+
+.chamber-counts {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.chamber-dem {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dem);
+  min-width: 32px;
+  text-align: right;
+}
+
+.chamber-rep {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--rep);
+  min-width: 32px;
+}
+
+.chamber-divider {
+  width: 0.5px;
+  height: 28px;
+  background: var(--border2);
+}
+
+.seats-note {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  padding-left: 6px;
+  border-left: 0.5px solid var(--border2);
+  line-height: 1.5;
+  max-width: 80px;
+}
+
+.ev-track {
+  width: 200px;
+  height: 5px;
+  background: var(--rep);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ev-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--dem);
+  border-radius: 3px;
+  width: 42%;
+  transition: width 0.5s ease;
+}
+
+.ev-marker {
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 1px;
+  height: 11px;
+  background: var(--text);
+  opacity: 0.25;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.nav-link:hover, .nav-link.active { color: var(--text); }
+
+/* DARK MODE TOGGLE */
+.theme-toggle {
+  background: none;
+  border: 0.5px solid var(--border2);
+  color: var(--muted);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+/* MAIN */
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.map-panel {
+  flex: 0 0 54%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 0.5px solid var(--border2);
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+#map-container {
+  width: 100%;
+  max-width: 920px;
+  padding: 8px 24px 4px;
+}
+
+#us-map { width: 100%; height: auto; display: block; }
+
+.state-path {
+  stroke: var(--map-stroke);
+  stroke-width: 0.7;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.state-path:hover { opacity: 0.70; }
+.state-path.selected { stroke: var(--text); stroke-width: 2; opacity: 1; }
+
+.map-legend {
+  position: absolute;
+  bottom: 14px;
+  left: 28px;
+  display: flex;
+  gap: 18px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.map-overlay-btns {
+  position: absolute;
+  bottom: 14px;
+  right: 28px;
+  display: flex;
+  gap: 6px;
+}
+
+.overlay-btn {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  color: var(--muted);
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  padding: 4px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+
+.overlay-btn:hover { color: var(--text); border-color: var(--text); }
+.overlay-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* TOOLTIP */
+.state-tooltip {
+  position: fixed;
+  pointer-events: none;
+  display: none;
+  z-index: 200;
+  width: 230px;
+}
+
+.tooltip-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 28px var(--tooltip-shadow);
+  transition: background 0.3s ease;
+}
+
+.tooltip-header {
+  padding: 10px 14px 8px;
+  border-bottom: 0.5px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.tooltip-state-name {
+  font-family: 'EB Garamond', serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.tooltip-ev { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; }
+
+.tooltip-body {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.tooltip-label { color: var(--muted); font-size: 11px; letter-spacing: 0.04em; }
+.tooltip-value { font-weight: 500; font-size: 12px; color: var(--text); }
+
+.poll-bar-wrap { margin-top: 2px; }
+
+.poll-candidates {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.poll-cand-d { color: var(--dem); font-weight: 500; }
+.poll-cand-r { color: var(--rep); font-weight: 500; }
+
+.poll-bar {
+  height: 5px;
+  background: var(--rep);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.poll-bar-fill {
+  height: 100%;
+  background: var(--dem);
+  border-radius: 3px;
+}
+
+.tooltip-lean {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.lean-d { background: rgba(58,107,158,0.15); color: var(--dem); }
+.lean-r { background: rgba(185,64,64,0.15); color: var(--rep); }
+.lean-s { background: rgba(122,112,64,0.15); color: var(--swing); }
+
+.tooltip-footer {
+  padding: 7px 14px;
+  border-top: 0.5px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+/* NEWS PANEL */
+.news-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  transition: background 0.3s ease;
+}
+
+.news-header {
+  padding: 10px 28px;
+  border-bottom: 0.5px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.news-state-label {
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  color: var(--text);
+  font-style: italic;
+}
+
+.news-state-label span {
+  font-style: normal;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+}
+
+.filter-row { display: flex; gap: 5px; align-items: center; }
+.filter-label { font-size: 11px; color: var(--muted); margin-right: 4px; letter-spacing: 0.04em; }
+
+.filter-btn {
+  background: none;
+  border: 0.5px solid var(--border2);
+  color: var(--muted);
+  font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  padding: 3px 11px;
+  border-radius: 20px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover { color: var(--text); border-color: var(--text); }
+.filter-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.news-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  align-content: start;
+}
+
+.news-feed::-webkit-scrollbar { width: 3px; }
+.news-feed::-webkit-scrollbar-track { background: transparent; }
+.news-feed::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.news-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.news-card:hover { background: var(--surface2); }
+
+.news-source-row { display: flex; align-items: center; gap: 6px; }
+
+.bias-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pip-left { background: #3A6B9E; }
+.pip-center-left { background: #7A9FBF; }
+.pip-center { background: #7A8A6A; }
+.pip-center-right { background: #BF9A6A; }
+.pip-right { background: #B94040; }
+
+.news-source-name { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.news-headline { font-size: 13px; line-height: 1.5; color: var(--text); }
+.news-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.empty-state {
+  grid-column: 1/-1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 12px;
+}
+
+.empty-glyph {
+  font-family: 'EB Garamond', serif;
+  font-size: 48px;
+  opacity: 0.15;
+  color: var(--text);
+}
+
+.empty-text { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; }
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.22);
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+.article-drawer {
+  position: fixed;
+  top: 52px;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  background: var(--surface);
+  border-left: 0.5px solid var(--border2);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.22,1,0.36,1);
+}
+.article-drawer.open { transform: translateX(0); }
+
+.drawer-header {
+  padding: 14px 18px 12px;
+  border-bottom: 0.5px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.drawer-header-content { flex: 1; }
+.drawer-source-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+.drawer-close {
+  background: none;
+  border: 0.5px solid var(--border2);
+  color: var(--muted);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.drawer-close:hover { color: var(--text); border-color: var(--text); }
+.drawer-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 18px;
+  line-height: 1.38;
+  font-weight: 500;
+  color: var(--text);
+}
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.drawer-body::-webkit-scrollbar { width: 3px; }
+.drawer-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.drawer-img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--surface2);
+}
+.drawer-img-placeholder {
+  width: 100%;
+  height: 120px;
+  background: var(--surface2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'EB Garamond', serif;
+  font-size: 36px;
+  color: var(--muted);
+  opacity: 0.25;
+}
+.drawer-desc {
+  font-size: 14px;
+  line-height: 1.72;
+  color: var(--text);
+}
+.drawer-meta {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  padding-top: 4px;
+  border-top: 0.5px solid var(--border);
+}
+.drawer-footer {
+  padding: 12px 18px;
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.drawer-read-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+/* VOTUM ANALYSIS PANEL */
+.votum-panel {
+  border-top: 0.5px solid var(--border);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vp-section { display: flex; flex-direction: column; gap: 7px; }
+
+.vp-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.vp-point {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  font-style: italic;
+}
+
+.spread-bar {
+  height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  background: var(--surface2);
+}
+
+.spread-seg { height: 100%; transition: width 0.5s ease; }
+.spread-l { background: var(--dem); }
+.spread-c { background: #7A8A6A; }
+.spread-r { background: var(--rep); }
+
+.spread-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.vp-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.vp-flag {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  border: 0.5px solid;
+}
+
+.flag-caution {
+  background: rgba(186,112,0,0.08);
+  color: #8A5500;
+  border-color: rgba(186,112,0,0.2);
+}
+
+.flag-info {
+  background: rgba(58,107,158,0.08);
+  color: #2A5A8A;
+  border-color: rgba(58,107,158,0.2);
+}
+
+.flag-warn {
+  background: rgba(160,40,40,0.08);
+  color: #8A2020;
+  border-color: rgba(160,40,40,0.2);
+}
+
+[data-theme="dark"] .flag-caution { background: rgba(186,112,0,0.15); color: #D4922A; border-color: rgba(186,112,0,0.3); }
+[data-theme="dark"] .flag-info { background: rgba(58,107,158,0.15); color: #6AABE0; border-color: rgba(58,107,158,0.3); }
+[data-theme="dark"] .flag-warn { background: rgba(160,40,40,0.15); color: #E06060; border-color: rgba(160,40,40,0.3); }
+
+.vp-score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vp-score-bar-wrap {
+  flex: 1;
+  height: 5px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.vp-score-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  background: #7A8A6A;
+}
+
+.vp-score-num {
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 30px;
+  text-align: right;
+}
+
+.vp-score-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.vp-counter-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border2);
+  border-radius: 7px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.vp-counter-card:hover { background: var(--border); }
+
+.vp-counter-source {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.vp-counter-title {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.vp-counter-arrow {
+  color: var(--muted);
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.votum-loading {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--border);
+}
+
+.vl-bar {
+  height: 10px;
+  width: 100%;
+  border-radius: 4px;
+  background: var(--surface2);
+  animation: vl-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes vl-pulse {
+  0%,100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<div class="article-drawer" id="article-drawer">
+  <div class="drawer-header">
+    <div class="drawer-header-content">
+      <div class="drawer-source-row">
+        <div class="bias-pip" id="drawer-pip"></div>
+        <span class="news-source-name" id="drawer-source">—</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--muted)" id="drawer-time">—</span>
+      </div>
+      <div class="drawer-title" id="drawer-title">—</div>
+    </div>
+    <button class="drawer-close" id="drawer-close">×</button>
+  </div>
+  <div class="drawer-body">
+    <div id="drawer-img-wrap"></div>
+    <div class="drawer-desc" id="drawer-desc"></div>
+    <div class="drawer-meta" id="drawer-meta"></div>
+
+    <div class="votum-panel" id="votum-panel" style="display:none">
+      <div class="vp-section">
+        <div class="vp-label">The Point</div>
+        <div class="vp-point" id="vp-point">—</div>
+      </div>
+
+      <div class="vp-section">
+        <div class="vp-label">Coverage Spread</div>
+        <div class="vp-spread" id="vp-spread">
+          <div class="spread-bar">
+            <div class="spread-seg spread-l" id="spread-l"></div>
+            <div class="spread-seg spread-c" id="spread-c"></div>
+            <div class="spread-seg spread-r" id="spread-r"></div>
+          </div>
+          <div class="spread-labels">
+            <span id="spread-l-label">Left</span>
+            <span id="spread-c-label">Center</span>
+            <span id="spread-r-label">Right</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vp-section">
+        <div class="vp-label">Flags</div>
+        <div class="vp-flags" id="vp-flags"></div>
+      </div>
+
+      <div class="vp-section">
+        <div class="vp-label">Source Score</div>
+        <div class="vp-score-row">
+          <div class="vp-score-bar-wrap">
+            <div class="vp-score-bar" id="vp-score-bar"></div>
+          </div>
+          <span class="vp-score-num" id="vp-score-num">—</span>
+        </div>
+        <div class="vp-score-note" id="vp-score-note"></div>
+      </div>
+
+      <div class="vp-section" id="vp-counter-wrap" style="display:none">
+        <div class="vp-label">Counter Story</div>
+        <a class="vp-counter-card" id="vp-counter-card" href="#" target="_blank" rel="noopener">
+          <div class="vp-counter-source" id="vp-counter-source"></div>
+          <div class="vp-counter-title" id="vp-counter-title"></div>
+          <span class="vp-counter-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="votum-loading" id="votum-loading">
+      <div class="vl-bar"></div>
+      <div class="vl-bar" style="width:70%;animation-delay:0.15s"></div>
+      <div class="vl-bar" style="width:85%;animation-delay:0.3s"></div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <a class="drawer-read-btn" id="drawer-link" href="#" target="_blank" rel="noopener">Read full article ↗</a>
+  </div>
+</div>
+
+<header>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="wordmark">
+      Votum
+      <div class="wordmark-dot"></div>
+      <span class="wordmark-sub">ink</span>
+    </div>
+  </div>
+
+  <div class="ev-bar-wrap">
+    <div class="midterm-label">2026 Midterm Watch</div>
+    <div class="chamber-block">
+      <div class="chamber-name">Senate</div>
+      <div class="chamber-counts">
+        <span class="chamber-dem">47D</span>
+        <div class="ev-track">
+          <div class="ev-fill" style="width:47%"></div>
+          <div class="ev-marker" style="left:50%"></div>
+        </div>
+        <span class="chamber-rep">53R</span>
+      </div>
+    </div>
+    <div class="chamber-divider"></div>
+    <div class="chamber-block">
+      <div class="chamber-name">House</div>
+      <div class="chamber-counts">
+        <span class="chamber-dem">213D</span>
+        <div class="ev-track">
+          <div class="ev-fill" style="width:49%"></div>
+          <div class="ev-marker" style="left:50%"></div>
+        </div>
+        <span class="chamber-rep">220R</span>
+      </div>
+    </div>
+    <div class="seats-note">34 Senate · 435 House seats in play</div>
+  </div>
+
+  <div class="nav-links">
+    <span class="nav-link active">Map</span>
+    <a class="nav-link" href="the-point.html" style="text-decoration:none;color:var(--muted)">The Point</a>
+    <span class="nav-link">Polls</span>
+    <span class="nav-link">Issues</span>
+    <span class="nav-link">About</span>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">☀</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="map-panel">
+    <div id="map-container">
+      <svg id="us-map" viewBox="-30 0 1010 630" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="map-legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--dem)"></div>Democratic</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--rep)"></div>Republican</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--swing)"></div>Toss-up</div>
+    </div>
+    <div class="map-overlay-btns">
+      <button class="overlay-btn active" onclick="setOverlay('electoral',this)">Electoral</button>
+      <button class="overlay-btn" onclick="setOverlay('polling',this)">Polling</button>
+      <button class="overlay-btn" onclick="setOverlay('turnout',this)">Turnout</button>
+    </div>
+  </div>
+
+  <div class="news-panel">
+    <div class="news-header">
+      <div class="news-state-label" id="news-label">
+        <span>Select a state to load news &nbsp;·&nbsp; hover for quick stats</span>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Source</span>
+        <button class="filter-btn active" data-bias="all">All</button>
+        <button class="filter-btn" data-bias="left">Left</button>
+        <button class="filter-btn" data-bias="center">Center</button>
+        <button class="filter-btn" data-bias="right">Right</button>
+      </div>
+    </div>
+    <div class="news-feed" id="news-feed">
+      <div class="empty-state">
+        <div class="empty-glyph">V</div>
+        <div class="empty-text">Click any state on the map<br>to surface its news &amp; political data</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="state-tooltip" id="state-tooltip">
+  <div class="tooltip-card">
+    <div class="tooltip-header">
+      <div class="tooltip-state-name" id="tt-name">—</div>
+      <div class="tooltip-ev" id="tt-ev">— EV</div>
+    </div>
+    <div class="tooltip-body">
+      <div class="poll-bar-wrap">
+        <div class="poll-candidates">
+          <span class="poll-cand-d" id="tt-dem-pct">D —%</span>
+          <span class="poll-cand-r" id="tt-rep-pct">R —%</span>
+        </div>
+        <div class="poll-bar">
+          <div class="poll-bar-fill" id="tt-poll-fill" style="width:50%"></div>
+        </div>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Senate seats</span>
+        <span class="tooltip-value" id="tt-result">—</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Gov.</span>
+        <span class="tooltip-value" id="tt-margin">—</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Lean</span>
+        <span id="tt-lean">—</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Top issue</span>
+        <span class="tooltip-value" id="tt-issue">—</span>
+      </div>
+    </div>
+    <div class="tooltip-footer">Click to load full news feed</div>
+  </div>
+</div>
+
+<script type="module">
+const STATE_DATA = {
+  AL:{name:"Alabama",ev:9,lean:"R",dem:34,rep:65,senate:"2R",gov:"R – Ivey",issue:"Immigration"},
+  AK:{name:"Alaska",ev:3,lean:"R",dem:37,rep:54,senate:"1R 1I",gov:"R – Dunleavy",issue:"Energy"},
+  AZ:{name:"Arizona",ev:11,lean:"S",dem:47,rep:52,senate:"1D 1R",gov:"D – Hobbs",issue:"Border security"},
+  AR:{name:"Arkansas",ev:6,lean:"R",dem:34,rep:64,senate:"2R",gov:"R – Sanders",issue:"Economy"},
+  CA:{name:"California",ev:54,lean:"D",dem:63,rep:35,senate:"2D",gov:"D – Newsom",issue:"Housing"},
+  CO:{name:"Colorado",ev:10,lean:"D",dem:55,rep:43,senate:"2D",gov:"D – Polis",issue:"Climate"},
+  CT:{name:"Connecticut",ev:7,lean:"D",dem:57,rep:41,senate:"2D",gov:"D – Lamont",issue:"Cost of living"},
+  DE:{name:"Delaware",ev:3,lean:"D",dem:57,rep:41,senate:"2D",gov:"D – Meyer",issue:"Healthcare"},
+  FL:{name:"Florida",ev:30,lean:"R",dem:43,rep:56,senate:"2R",gov:"R – DeSantis",issue:"Insurance"},
+  GA:{name:"Georgia",ev:16,lean:"S",dem:48,rep:51,senate:"1D 1R",gov:"R – Kemp",issue:"Economy"},
+  HI:{name:"Hawaii",ev:4,lean:"D",dem:63,rep:34,senate:"2D",gov:"D – Green",issue:"Housing"},
+  ID:{name:"Idaho",ev:4,lean:"R",dem:30,rep:66,senate:"2R",gov:"R – Little",issue:"Land rights"},
+  IL:{name:"Illinois",ev:19,lean:"D",dem:57,rep:41,senate:"2D",gov:"D – Pritzker",issue:"Crime"},
+  IN:{name:"Indiana",ev:11,lean:"R",dem:39,rep:59,senate:"2R",gov:"R – Braun",issue:"Manufacturing"},
+  IA:{name:"Iowa",ev:6,lean:"R",dem:44,rep:54,senate:"2R",gov:"R – Reynolds",issue:"Agriculture"},
+  KS:{name:"Kansas",ev:6,lean:"R",dem:36,rep:62,senate:"2R",gov:"D – Kelly",issue:"Agriculture"},
+  KY:{name:"Kentucky",ev:8,lean:"R",dem:35,rep:63,senate:"2R",gov:"R – Beshear",issue:"Coal & energy"},
+  LA:{name:"Louisiana",ev:8,lean:"R",dem:38,rep:60,senate:"2R",gov:"R – Landry",issue:"Economy"},
+  ME:{name:"Maine",ev:4,lean:"D",dem:53,rep:44,senate:"1D 1I",gov:"D – Mills",issue:"Fishing & trade"},
+  MD:{name:"Maryland",ev:10,lean:"D",dem:63,rep:35,senate:"2D",gov:"D – Moore",issue:"Federal workforce"},
+  MA:{name:"Massachusetts",ev:11,lean:"D",dem:61,rep:36,senate:"2D",gov:"D – Healey",issue:"Healthcare"},
+  MI:{name:"Michigan",ev:15,lean:"S",dem:48,rep:50,senate:"2D",gov:"D – Whitmer",issue:"Auto industry"},
+  MN:{name:"Minnesota",ev:10,lean:"D",dem:52,rep:46,senate:"2D",gov:"D – Walz",issue:"Healthcare"},
+  MS:{name:"Mississippi",ev:6,lean:"R",dem:39,rep:59,senate:"2R",gov:"R – Reeves",issue:"Poverty"},
+  MO:{name:"Missouri",ev:10,lean:"R",dem:38,rep:60,senate:"2R",gov:"R – Kehoe",issue:"Crime"},
+  MT:{name:"Montana",ev:4,lean:"R",dem:39,rep:58,senate:"2R",gov:"R – Gianforte",issue:"Land rights"},
+  NE:{name:"Nebraska",ev:5,lean:"R",dem:37,rep:59,senate:"2R",gov:"R – Pillen",issue:"Agriculture"},
+  NV:{name:"Nevada",ev:6,lean:"S",dem:48,rep:50,senate:"2D",gov:"R – Lombardo",issue:"Cost of living"},
+  NH:{name:"New Hampshire",ev:4,lean:"D",dem:52,rep:46,senate:"2R",gov:"R – Ayotte",issue:"Healthcare"},
+  NJ:{name:"New Jersey",ev:14,lean:"D",dem:55,rep:43,senate:"2D",gov:"D – Murphy",issue:"Property tax"},
+  NM:{name:"New Mexico",ev:5,lean:"D",dem:54,rep:44,senate:"2D",gov:"D – Grisham",issue:"Energy"},
+  NY:{name:"New York",ev:28,lean:"D",dem:57,rep:41,senate:"2D",gov:"D – Hochul",issue:"Crime & cost"},
+  NC:{name:"North Carolina",ev:16,lean:"S",dem:48,rep:51,senate:"2R",gov:"D – Stein",issue:"Economy"},
+  ND:{name:"North Dakota",ev:3,lean:"R",dem:30,rep:67,senate:"2R",gov:"R – Armstrong",issue:"Agriculture"},
+  OH:{name:"Ohio",ev:17,lean:"R",dem:44,rep:55,senate:"2R",gov:"R – DeWine",issue:"Economy"},
+  OK:{name:"Oklahoma",ev:7,lean:"R",dem:32,rep:65,senate:"2R",gov:"R – Stitt",issue:"Energy"},
+  OR:{name:"Oregon",ev:8,lean:"D",dem:56,rep:39,senate:"2D",gov:"D – Kotek",issue:"Homelessness"},
+  PA:{name:"Pennsylvania",ev:19,lean:"S",dem:48,rep:51,senate:"1D 1R",gov:"D – Shapiro",issue:"Economy"},
+  RI:{name:"Rhode Island",ev:4,lean:"D",dem:59,rep:39,senate:"2D",gov:"D – McKee",issue:"Healthcare"},
+  SC:{name:"South Carolina",ev:9,lean:"R",dem:41,rep:57,senate:"2R",gov:"R – McMaster",issue:"Economy"},
+  SD:{name:"South Dakota",ev:3,lean:"R",dem:34,rep:62,senate:"2R",gov:"R – Noem",issue:"Agriculture"},
+  TN:{name:"Tennessee",ev:11,lean:"R",dem:34,rep:65,senate:"2R",gov:"R – Lee",issue:"Economy"},
+  TX:{name:"Texas",ev:40,lean:"R",dem:43,rep:56,senate:"2R",gov:"R – Abbott",issue:"Border & energy"},
+  UT:{name:"Utah",ev:6,lean:"R",dem:38,rep:58,senate:"2R",gov:"R – Cox",issue:"Land & water"},
+  VT:{name:"Vermont",ev:3,lean:"D",dem:64,rep:30,senate:"1D 1I",gov:"R – Scott",issue:"Healthcare"},
+  VA:{name:"Virginia",ev:13,lean:"D",dem:52,rep:46,senate:"2D",gov:"D – Youngkin",issue:"Federal jobs"},
+  WA:{name:"Washington",ev:12,lean:"D",dem:58,rep:39,senate:"2D",gov:"D – Ferguson",issue:"Tech & housing"},
+  WV:{name:"West Virginia",ev:4,lean:"R",dem:28,rep:69,senate:"2R",gov:"R – Morrisey",issue:"Energy"},
+  WI:{name:"Wisconsin",ev:10,lean:"S",dem:49,rep:50,senate:"1D 1R",gov:"D – Evers",issue:"Economy"},
+  WY:{name:"Wyoming",ev:3,lean:"R",dem:26,rep:70,senate:"2R",gov:"R – Gordon",issue:"Energy"},
+  DC:{name:"D.C.",ev:3,lean:"D",dem:92,rep:6,senate:"Non-voting",gov:"D – Bowser",issue:"Federal policy"}
+};
+
+const SOURCES = [
+  {name:"AP News",bias:"center",pip:"pip-center"},
+  {name:"Reuters",bias:"center",pip:"pip-center"},
+  {name:"The Hill",bias:"center",pip:"pip-center"},
+  {name:"Axios",bias:"center-left",pip:"pip-center-left"},
+  {name:"NPR",bias:"center-left",pip:"pip-center-left"},
+  {name:"New York Times",bias:"left",pip:"pip-left"},
+  {name:"Washington Post",bias:"left",pip:"pip-left"},
+  {name:"Wall Street Journal",bias:"center-right",pip:"pip-center-right"},
+  {name:"The Dispatch",bias:"center-right",pip:"pip-center-right"},
+  {name:"Fox News",bias:"right",pip:"pip-right"},
+  {name:"National Review",bias:"right",pip:"pip-right"}
+];
+
+const HEADLINES = [
+  s=>`${s} governor announces infrastructure overhaul as federal funds dry up`,
+  s=>`Polling shifts in ${s} signal tightening race ahead of next cycle`,
+  s=>`${s} legislature debates sweeping education funding reform`,
+  s=>`Economic anxiety drives voter sentiment in ${s}, surveys show`,
+  s=>`Environmental coalition challenges ${s} energy policy in court`,
+  s=>`${s} voting rights ruling draws national scrutiny`,
+  s=>`How immigration debate is reshaping ${s} politics`,
+  s=>`${s} housing crisis forces emergency legislative response`,
+  s=>`Public health advocates warn against ${s} Medicaid cuts`,
+  s=>`${s} congressional delegation fractures over federal budget`,
+  s=>`New polling: ${s} voters split on economy vs. social issues`,
+  s=>`${s} attorney general opens investigation into election integrity claims`
+];
+
+const BIAS_GROUPS = {
+  all:['left','center-left','center','center-right','right'],
+  left:['left','center-left'],
+  center:['center'],
+  right:['right','center-right']
+};
+
+let selectedState = null;
+let activeBias = 'all';
+
+function getLeanColor(lean) {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (lean==='D') return isDark ? '#4A86BF' : '#3A6B9E';
+  if (lean==='R') return isDark ? '#C9534F' : '#B94040';
+  return isDark ? '#9A9050' : '#7A7040';
+}
+
+function timeAgo() {
+  const m = [8,15,23,41,67,94,130,200,310][Math.floor(Math.random()*9)];
+  return m < 60 ? `${m}m ago` : `${Math.floor(m/60)}h ${m%60}m ago`;
+}
+
+// All API calls go through secure Netlify functions — no keys in browser
+async function fetchNews(stateName) {
+  const feed = document.getElementById('news-feed');
+  feed.innerHTML = '<div class="empty-state"><div class="empty-glyph" style="animation:pulse 1.5s infinite">V</div><div class="empty-text">Loading news...</div></div>';
+
+  try {
+    const res = await fetch(`/.netlify/functions/news?state=${encodeURIComponent(stateName)}&max=10`);
+    const data = await res.json();
+    const articles = data.articles || [];
+
+    if (!articles.length) throw new Error('No articles');
+
+    const toShow = activeBias === 'all' ? articles : articles.filter(a => {
+      const src = guessBias(a.source);
+      return BIAS_GROUPS[activeBias].includes(src.bias);
+    });
+
+    feed.innerHTML = '';
+
+    if (!toShow.length) {
+      feed.innerHTML = '<div class="empty-state"><div class="empty-glyph">·</div><div class="empty-text">No sources match this filter</div></div>';
+      return;
+    }
+
+    toShow.forEach(a => {
+      const src = guessBias(a.source);
+      const card = document.createElement('div');
+      card.className = 'news-card';
+      card.innerHTML = `
+        <div class="news-source-row">
+          <div class="bias-pip ${src.pip}"></div>
+          <span class="news-source-name">${a.source}</span>
+        </div>
+        <div class="news-headline">${a.title}</div>
+        <div class="news-time">${timeAgoFromDate(a.publishedAt)}</div>
+      `;
+      card.addEventListener('click', () => openDrawer({
+        title: a.title,
+        description: a.description || 'No preview available.',
+        source: a.source, url: a.url,
+        image: a.image, publishedAt: a.publishedAt,
+        pip: src.pip
+      }));
+      feed.appendChild(card);
+    });
+
+  } catch(err) {
+    renderNewsMock(stateName);
+  }
+}
+
+function guessBias(sourceName) {
+  const n = sourceName.toLowerCase();
+  if (['fox news','breitbart','national review','new york post','daily wire'].some(s=>n.includes(s)))
+    return {bias:'right', pip:'pip-right'};
+  if (['wall street journal','the dispatch','reason'].some(s=>n.includes(s)))
+    return {bias:'center-right', pip:'pip-center-right'};
+  if (['new york times','washington post','msnbc','the atlantic','guardian'].some(s=>n.includes(s)))
+    return {bias:'left', pip:'pip-left'};
+  if (['npr','axios','politico','the hill'].some(s=>n.includes(s)))
+    return {bias:'center-left', pip:'pip-center-left'};
+  return {bias:'center', pip:'pip-center'};
+}
+
+function timeAgoFromDate(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 60000);
+  if (diff < 60) return `${diff}m ago`;
+  if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
+  return `${Math.floor(diff/1440)}d ago`;
+}
+
+function renderNewsMock(stateName) {
+  const feed = document.getElementById('news-feed');
+  feed.innerHTML = '';
+  const usedH = new Set();
+  const pool = [];
+
+  for (let i=0; i<10; i++) {
+    let hi;
+    do { hi = Math.floor(Math.random()*HEADLINES.length); } while(usedH.has(hi));
+    usedH.add(hi);
+    const src = SOURCES[Math.floor(Math.random()*SOURCES.length)];
+    pool.push({headline: HEADLINES[hi](stateName), source: src, time: timeAgo()});
+  }
+
+  const filtered = pool.filter(a => BIAS_GROUPS[activeBias].includes(a.source.bias));
+
+  if (!filtered.length) {
+    feed.innerHTML = '<div class="empty-state"><div class="empty-glyph">·</div><div class="empty-text">No sources match this filter</div></div>';
+    return;
+  }
+
+  filtered.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'news-card';
+    card.innerHTML = `
+      <div class="news-source-row">
+        <div class="bias-pip ${a.source.pip}"></div>
+        <span class="news-source-name">${a.source.name}</span>
+      </div>
+      <div class="news-headline">${a.headline}</div>
+      <div class="news-time">${a.time}</div>
+    `;
+    feed.appendChild(card);
+  });
+}
+
+function renderNews(abbr) {
+  const state = STATE_DATA[abbr];
+  fetchNews(state.name);
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeBias = btn.dataset.bias;
+    if (selectedState) fetchNews(STATE_DATA[selectedState].name);
+  });
+});
+
+window.setOverlay = function(type, btn) {
+  document.querySelectorAll('.overlay-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+};
+
+// DARK MODE TOGGLE
+const toggle = document.getElementById('theme-toggle');
+const html = document.documentElement;
+let dark = false;
+
+const saved = localStorage.getItem('votum-theme');
+if (saved === 'dark') { dark = true; html.setAttribute('data-theme','dark'); toggle.textContent = '☾'; }
+
+toggle.addEventListener('click', () => {
+  dark = !dark;
+  html.setAttribute('data-theme', dark ? 'dark' : 'light');
+  toggle.textContent = dark ? '☾' : '☀';
+  localStorage.setItem('votum-theme', dark ? 'dark' : 'light');
+  if (svgLoaded) recolorStates();
+});
+
+let svgLoaded = false;
+
+function recolorStates() {
+  document.querySelectorAll('.state-path').forEach(el => {
+    const abbr = el.dataset.abbr;
+    if (abbr && STATE_DATA[abbr]) {
+      el.setAttribute('fill', getLeanColor(STATE_DATA[abbr].lean));
+    }
+  });
+}
+
+const FIPS = {
+  "01":"AL","02":"AK","04":"AZ","05":"AR","06":"CA","08":"CO","09":"CT","10":"DE",
+  "11":"DC","12":"FL","13":"GA","15":"HI","16":"ID","17":"IL","18":"IN","19":"IA",
+  "20":"KS","21":"KY","22":"LA","23":"ME","24":"MD","25":"MA","26":"MI","27":"MN",
+  "28":"MS","29":"MO","30":"MT","31":"NE","32":"NV","33":"NH","34":"NJ","35":"NM",
+  "36":"NY","37":"NC","38":"ND","39":"OH","40":"OK","41":"OR","42":"PA","44":"RI",
+  "45":"SC","46":"SD","47":"TN","48":"TX","49":"UT","50":"VT","51":"VA","53":"WA",
+  "54":"WV","55":"WI","56":"WY"
+};
+
+const tooltip = document.getElementById('state-tooltip');
+
+function showTooltip(e, abbr) {
+  const s = STATE_DATA[abbr];
+  if (!s) return;
+  document.getElementById('tt-name').textContent = s.name;
+  document.getElementById('tt-ev').textContent = `${s.ev} EV`;
+  document.getElementById('tt-dem-pct').textContent = `D ${s.dem}%`;
+  document.getElementById('tt-rep-pct').textContent = `R ${s.rep}%`;
+  document.getElementById('tt-poll-fill').style.width = s.dem + '%';
+  document.getElementById('tt-result').textContent = s.senate || '—';
+  document.getElementById('tt-margin').textContent = s.gov || '—';
+  document.getElementById('tt-issue').textContent = s.issue;
+  const leanClass = s.lean==='D'?'lean-d':s.lean==='R'?'lean-r':'lean-s';
+  const leanText = s.lean==='D'?'Likely Democrat':s.lean==='R'?'Likely Republican':'Toss-up';
+  document.getElementById('tt-lean').innerHTML = `<span class="tooltip-lean ${leanClass}">${leanText}</span>`;
+  tooltip.style.display = 'block';
+  positionTooltip(e);
+}
+
+function positionTooltip(e) {
+  const tw=230, th=230, vw=window.innerWidth, vh=window.innerHeight;
+  let x = e.clientX + 16;
+  let y = e.clientY - 40;
+  if (x+tw > vw-10) x = e.clientX - tw - 16;
+  if (y+th > vh-10) y = vh - th - 10;
+  if (y < 10) y = 10;
+  tooltip.style.left = x+'px';
+  tooltip.style.top = y+'px';
+}
+
+// ARTICLE DRAWER
+const drawer = document.getElementById('article-drawer');
+const overlay = document.getElementById('drawer-overlay');
+document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+function openDrawer(article) {
+  document.getElementById('drawer-title').textContent = article.title;
+  document.getElementById('drawer-source').textContent = article.source;
+  document.getElementById('drawer-time').textContent = timeAgoFromDate(article.publishedAt);
+  document.getElementById('drawer-desc').textContent = article.description;
+  document.getElementById('drawer-meta').textContent = new Date(article.publishedAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('drawer-link').href = article.url;
+  document.getElementById('drawer-pip').className = `bias-pip ${article.pip}`;
+
+  const imgWrap = document.getElementById('drawer-img-wrap');
+  if (article.image) {
+    imgWrap.innerHTML = `<img class="drawer-img" src="${article.image}" alt="" onerror="this.parentNode.innerHTML='<div class=drawer-img-placeholder>V</div>'">`;
+  } else {
+    imgWrap.innerHTML = '<div class="drawer-img-placeholder">V</div>';
+  }
+
+  document.getElementById('votum-panel').style.display = 'none';
+  document.getElementById('votum-loading').style.display = 'flex';
+
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+
+  analyzeArticle(article);
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+async function analyzeArticle(article) {
+  try {
+    const res = await fetch('/.netlify/functions/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: article.title,
+        source: article.source,
+        description: article.description || ''
+      })
+    });
+    const analysis = await res.json();
+    renderAnalysis(analysis);
+  } catch(err) {
+    console.error('Analysis error:', err);
+    document.getElementById('votum-loading').style.display = 'none';
+  }
+}
+
+function renderAnalysis(a) {
+  document.getElementById('votum-loading').style.display = 'none';
+
+  document.getElementById('vp-point').textContent = a.the_point;
+
+  const total = a.coverage_spread.left + a.coverage_spread.center + a.coverage_spread.right;
+  document.getElementById('spread-l').style.width = (a.coverage_spread.left/total*100) + '%';
+  document.getElementById('spread-c').style.width = (a.coverage_spread.center/total*100) + '%';
+  document.getElementById('spread-r').style.width = (a.coverage_spread.right/total*100) + '%';
+  document.getElementById('spread-l-label').textContent = `Left ${a.coverage_spread.left}%`;
+  document.getElementById('spread-c-label').textContent = `Center ${a.coverage_spread.center}%`;
+  document.getElementById('spread-r-label').textContent = `Right ${a.coverage_spread.right}%`;
+
+  const flagsEl = document.getElementById('vp-flags');
+  flagsEl.innerHTML = '';
+  if (a.flags && a.flags.length) {
+    a.flags.forEach(f => {
+      const pill = document.createElement('span');
+      pill.className = `vp-flag flag-${f.type}`;
+      pill.textContent = f.label;
+      flagsEl.appendChild(pill);
+    });
+  } else {
+    flagsEl.innerHTML = '<span class="vp-flag flag-info">No flags detected</span>';
+  }
+
+  const score = Math.round(a.source_score);
+  document.getElementById('vp-score-bar').style.width = score + '%';
+  document.getElementById('vp-score-bar').style.background = score > 70 ? '#7A8A6A' : score > 45 ? '#BA7517' : '#B94040';
+  document.getElementById('vp-score-num').textContent = score + '/100';
+  document.getElementById('vp-score-note').textContent = a.source_note;
+
+  const counterWrap = document.getElementById('vp-counter-wrap');
+  if (a.counter_story && a.counter_story.exists) {
+    document.getElementById('vp-counter-source').textContent = a.counter_story.source;
+    document.getElementById('vp-counter-title').textContent = a.counter_story.title;
+    counterWrap.style.display = 'flex';
+  } else {
+    counterWrap.style.display = 'none';
+  }
+
+  document.getElementById('votum-panel').style.display = 'flex';
+}
+
+async function loadMap() {
+  const [topoRes, {feature}, {geoPath, geoAlbersUsa}] = await Promise.all([
+    fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'),
+    import('https://cdn.jsdelivr.net/npm/topojson-client@3/+esm'),
+    import('https://cdn.jsdelivr.net/npm/d3-geo@3/+esm')
+  ]);
+
+  const us = await topoRes.json();
+  const svg = document.getElementById('us-map');
+  const projection = geoAlbersUsa().scale(1180).translate([480,310]);
+  const path = geoPath().projection(projection);
+  const states = feature(us, us.objects.states);
+
+  states.features.forEach(f => {
+    const fips = String(f.id).padStart(2,'0');
+    const abbr = FIPS[fips];
+    if (!abbr || !STATE_DATA[abbr]) return;
+    const s = STATE_DATA[abbr];
+    const d = path(f);
+    if (!d) return;
+
+    const el = document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d', d);
+    el.setAttribute('fill', getLeanColor(s.lean));
+    el.setAttribute('class','state-path');
+    el.dataset.abbr = abbr;
+
+    el.addEventListener('mouseenter', e => showTooltip(e, abbr));
+    el.addEventListener('mousemove', e => positionTooltip(e));
+    el.addEventListener('mouseleave', () => { tooltip.style.display='none'; });
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.state-path').forEach(p=>p.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedState = abbr;
+      document.getElementById('news-label').innerHTML =
+        `${s.name} <span>· ${s.senate} senate · Gov. ${s.gov}</span>`;
+      renderNews(abbr);
+      tooltip.style.display='none';
+    });
+
+    svg.appendChild(el);
+  });
+
+  svgLoaded = true;
+}
+
+loadMap().catch(console.error);
+</script>
+</body>
+</html>
