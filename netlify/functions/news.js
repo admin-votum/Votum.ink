@@ -40,6 +40,12 @@ const SOURCE_REACH = {
   'los angeles times': 20, 'boston globe': 8,
   'philadelphia inquirer': 5, 'arizona republic': 4,
   'detroit free press': 4, 'minneapolis star': 3,
+  'arizona capitol times': 2, 'capitol times': 2,
+  'florida phoenix': 2, 'michigan advance': 2,
+  'georgia recorder': 2, 'nevada current': 2,
+  'pennsylvania capital': 2, 'wisconsin examiner': 2,
+  'colorado sun': 2, 'minnesota reformer': 2,
+  'north carolina health': 2, 'virginia mercury': 2,
 };
 
 function getReach(sourceName) {
@@ -54,9 +60,20 @@ function getReach(sourceName) {
 function rankScore(article) {
   const reach = getReach(article.source);
   const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
-  const freshness = Math.max(0, 100 - (ageHours * 1.5)); // Decays over ~67 hours
-  const reprint = Math.min(article.reprintCount || 0, 30); // Cap at 30
-  return (reach * 0.5) + (freshness * 0.35) + (reprint * 0.15);
+  const freshness = Math.max(0, 100 - (ageHours * 1.5));
+  const reprint = Math.min(article.reprintCount || 0, 30);
+  // Reach weighted much more heavily to push high-credibility sources up
+  return (reach * 0.70) + (freshness * 0.20) + (reprint * 0.10);
+}
+
+function isSpam(article) {
+  const reach = getReach(article.source);
+  const title = (article.title || '').toLowerCase();
+  // Filter out very low reach unknown sources and clickbait patterns
+  if (reach < 2) return true;
+  if (!article.title || article.title.length < 20) return true;
+  if (['click here','you won\'t believe','shocking','must see'].some(s => title.includes(s))) return true;
+  return false;
 }
 
 exports.handler = async function(event) {
@@ -121,10 +138,11 @@ exports.handler = async function(event) {
     }));
   } catch(e) {}
 
-  // Dedupe by title
+  // Filter spam and dedupe by title
   const seen = new Set();
   const deduped = results.filter(a => {
     if (!a.title) return false;
+    if (isSpam(a)) return false;
     const key = a.title.slice(0, 40).toLowerCase();
     if (seen.has(key)) return false;
     seen.add(key);
