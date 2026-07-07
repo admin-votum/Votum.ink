@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="i18n.js" defer></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -963,13 +964,13 @@ header {
   </div>
 
   <div class="nav-links">
-    <span class="nav-link active">Map</span>
-    <a class="nav-link" href="world.html" style="text-decoration:none;color:var(--muted)">World <span style="font-size:9px;letter-spacing:0.08em;color:#8A6A2A">PRO</span></a>
-    <a class="nav-link" href="the-point.html" style="text-decoration:none;color:var(--muted)">The Point</a>
-    <a class="nav-link" href="polls.html" style="text-decoration:none;color:var(--muted)">Polls</a>
-    <span class="nav-link">Issues</span>
-    <a class="nav-link" href="about.html" style="text-decoration:none;color:var(--muted)">About</a>
-    <a class="nav-link" href="signup.html" style="text-decoration:none;color:#8A6A2A;font-weight:500">Pro →</a>
+    <span class="nav-link active" data-i18n="navMap">Map</span>
+    <a class="nav-link" href="world.html" style="text-decoration:none;color:var(--muted)"><span data-i18n="navWorld">World</span> <span style="font-size:9px;letter-spacing:0.08em;color:#8A6A2A">PRO</span></a>
+    <a class="nav-link" href="the-point.html" style="text-decoration:none;color:var(--muted)" data-i18n="navPoint">The Point</a>
+    <a class="nav-link" href="polls.html" style="text-decoration:none;color:var(--muted)" data-i18n="navPolls">Polls</a>
+    <span class="nav-link" data-i18n="navIssues">Issues</span>
+    <a class="nav-link" href="about.html" style="text-decoration:none;color:var(--muted)" data-i18n="navAbout">About</a>
+    <a class="nav-link" href="signup.html" style="text-decoration:none;color:#8A6A2A;font-weight:500" data-i18n="navPro">Pro →</a>
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">☀</button>
   </div>
 </header>
