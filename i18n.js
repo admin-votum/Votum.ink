@@ -580,6 +580,7 @@ function buildLangSwitcher() {
   wrap.querySelectorAll('.lang-option').forEach(btn => {
     btn.addEventListener('click', () => {
       setLang(btn.dataset.lang);
+      applyAboutTranslations(btn.dataset.lang);
       wrap.querySelector('#lang-dropdown').classList.remove('open');
       // Update button
       const tr = TRANSLATIONS[btn.dataset.lang];
@@ -679,3 +680,102 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.VotumI18n = { t, setLang, getLang, TRANSLATIONS };
+
+// ABOUT PAGE — full section translations
+const ABOUT_TRANSLATIONS = {
+  en: {
+    pageLabel: "Votum · About",
+    pageTitle: "Built for the reader.\nNot the algorithm.",
+    prob_label: "The problem",
+    prob_text: `Most political news is optimized for engagement. Headlines are engineered to provoke, not inform. Articles are padded to justify the click. The actual fact — the thing you came to find out — is buried somewhere in paragraph seven.\n\nMeanwhile every feed, every platform, every outlet has a thumb on the scale. Sometimes intentional. Sometimes structural. Often invisible even to the people running it.\n\nThe result is a reader who speed-scrolls looking for the one bolded word that answers the question, already knowing roughly what the article will say before they open it.\n\nThat is not information. That is noise with a headline.`,
+    what_label: "What Votum does",
+    what_text: `Votum aggregates political news from across the full spectrum — left, center, and right — labels every source transparently, and gets out of the way.\n\nNo algorithmic amplification. No engagement ranking. No outrage economics. Articles are sorted by freshness and source credibility. The reader sees everything. The reader decides.`,
+    goal_label: "The goal",
+    goal_text: `The hardest bias to design out is your own. Votum is built toward maximum autonomy — a platform that surfaces information cleanly, labels it honestly, and introduces as little human editorial judgment as possible.\n\nThe reader is trusted. The reader is capable. The reader does not need to be told what to think about what they just read.\n\nThat trust is the whole product.`,
+    name_label: "The name",
+    name_text: `Votum — Latin for the formal expression of a citizen's will. The word Romans used for the declaration made before the assembly. A vow, a vote, a wish made public.\n\n.ink — the news. And the permanence of what's written.`,
+    contact_label: "Contact",
+    contact_text: "Votum is independent and reader-supported. For press, partnerships, or source methodology questions —",
+    how_label: "How it works",
+    tagline: "What actually happened.",
+  },
+  ru: {
+    pageLabel: "Votum · О нас",
+    pageTitle: "Создано для читателя.\nНе для алгоритма.",
+    prob_label: "Проблема",
+    prob_text: `Большинство политических новостей оптимизированы для вовлечённости. Заголовки созданы для провокации, а не для информирования. Статьи раздуты, чтобы оправдать клик. Сам факт — то, ради чего вы пришли — спрятан где-то в седьмом абзаце.\n\nМежду тем каждая лента, каждая платформа, каждое издание держит палец на весах. Иногда намеренно. Иногда структурно. Часто невидимо даже для тех, кто этим управляет.\n\nВ результате читатель быстро прокручивает страницу в поисках единственного выделенного слова, которое отвечает на вопрос, уже заранее зная, о чём будет статья.\n\nЭто не информация. Это шум с заголовком.`,
+    what_label: "Что делает Votum",
+    what_text: `Votum агрегирует политические новости со всего спектра — левые, центристские и правые — прозрачно маркирует каждый источник и не мешает читателю.\n\nНикакого алгоритмического усиления. Никакого рейтинга вовлечённости. Никакой экономики возмущения. Статьи сортируются по свежести и достоверности источника. Читатель видит всё. Читатель решает.`,
+    goal_label: "Цель",
+    goal_text: `Труднее всего устранить собственную предвзятость. Votum создан в направлении максимальной автономии — платформа, которая чисто подаёт информацию, честно её маркирует и привносит как можно меньше редакционных суждений.\n\nЧитателю доверяют. Читатель способен. Читателю не нужно говорить, что думать о прочитанном.\n\nЭто доверие и есть весь продукт.`,
+    name_label: "Название",
+    name_text: `Votum — латинское слово, означающее официальное выражение воли гражданина. Слово, которое римляне использовали для декларации перед собранием. Обет, голос, желание, ставшее публичным.\n\n.ink — новости. И постоянство написанного.`,
+    contact_label: "Контакт",
+    contact_text: "Votum независим и существует при поддержке читателей. По вопросам прессы, партнёрства или методологии источников —",
+    how_label: "Как это работает",
+    tagline: "Что на самом деле произошло.",
+  },
+  it: {
+    pageLabel: "Votum · Chi siamo",
+    pageTitle: "Costruito per il lettore.\nNon per l'algoritmo.",
+    prob_label: "Il problema",
+    prob_text: `La maggior parte delle notizie politiche è ottimizzata per il coinvolgimento. I titoli sono progettati per provocare, non per informare. Gli articoli sono gonfiati per giustificare il clic. Il fatto reale — quello per cui sei venuto — è sepolto da qualche parte nel settimo paragrafo.\n\nNel frattempo ogni feed, ogni piattaforma, ogni testata tiene il pollice sulla bilancia. A volte intenzionalmente. A volte strutturalmente. Spesso invisibile anche a chi li gestisce.\n\nIl risultato è un lettore che scorre velocemente cercando l'unica parola in grassetto che risponde alla domanda, sapendo già cosa dirà l'articolo prima di aprirlo.\n\nQuesta non è informazione. È rumore con un titolo.`,
+    what_label: "Cosa fa Votum",
+    what_text: `Votum aggrega notizie politiche da tutto lo spettro — sinistra, centro e destra — etichetta ogni fonte in modo trasparente e si fa da parte.\n\nNessuna amplificazione algoritmica. Nessuna classifica di coinvolgimento. Nessuna economia dell'indignazione. Gli articoli sono ordinati per freschezza e credibilità della fonte. Il lettore vede tutto. Il lettore decide.`,
+    goal_label: "L'obiettivo",
+    goal_text: `Il pregiudizio più difficile da eliminare è il proprio. Votum è costruito verso la massima autonomia — una piattaforma che presenta le informazioni in modo pulito, le etichetta onestamente e introduce il minor numero possibile di giudizi editoriali umani.\n\nIl lettore è fidato. Il lettore è capace. Il lettore non ha bisogno di essere istruito su cosa pensare di ciò che ha appena letto.\n\nQuesta fiducia è l'intero prodotto.`,
+    name_label: "Il nome",
+    name_text: `Votum — latino per l'espressione formale della volontà di un cittadino. La parola che i Romani usavano per la dichiarazione davanti all'assemblea. Un voto, un voto, un desiderio reso pubblico.\n\n.ink — le notizie. E la permanenza di ciò che è scritto.`,
+    contact_label: "Contatto",
+    contact_text: "Votum è indipendente e sostenuto dai lettori. Per stampa, partnership o domande sulla metodologia delle fonti —",
+    how_label: "Come funziona",
+    tagline: "Cosa è veramente successo.",
+  },
+};
+
+// Apply about page translations
+function applyAboutTranslations(lang) {
+  const t = ABOUT_TRANSLATIONS[lang] || ABOUT_TRANSLATIONS.en;
+  if (!document.querySelector('.page-label')) return; // Not about page
+
+  const setEl = (sel, text) => {
+    const el = document.querySelector(sel);
+    if (el && text) el.innerHTML = text.replace(/\n/g, '<br>');
+  };
+
+  setEl('.page-label', t.pageLabel);
+  setEl('.page-title', t.pageTitle);
+  setEl('.footer-tagline', t.tagline);
+
+  // Section labels and text
+  const sections = document.querySelectorAll('.section');
+  const sectionMap = [
+    { label: t.prob_label, text: t.prob_text },
+    { label: t.what_label, text: t.what_text },
+    null, // how it works — keep as is
+    { label: t.goal_label, text: t.goal_text },
+    { label: t.name_label, text: t.name_text },
+    { label: t.contact_label },
+  ];
+
+  sections.forEach((section, i) => {
+    if (!sectionMap[i]) return;
+    const labelEl = section.querySelector('.section-label');
+    const textEl = section.querySelector('.section-text');
+    if (labelEl && sectionMap[i].label) labelEl.textContent = sectionMap[i].label;
+    if (textEl && sectionMap[i].text) {
+      const paras = sectionMap[i].text.split('\n\n');
+      textEl.innerHTML = paras.map(p => `<p>${p}</p>`).join('');
+    }
+  });
+}
+
+// Override setLang to also handle about page
+const _origSetLang = window.VotumI18n?.setLang;
+document.addEventListener('DOMContentLoaded', () => {
+  const lang = getLang();
+  applyAboutTranslations(lang);
+});
+
+// Patch setLang to include about translations
+const origBuildSwitcher = buildLangSwitcher;
