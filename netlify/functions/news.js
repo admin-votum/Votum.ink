@@ -49,7 +49,11 @@ function isSpam(article) {
     'headtopics','natural news','naturalnews','oann','one america',
     'epoch times','townhall','redstate','pjmedia','frontpagemag',
     'american thinker','lifesitenews','westernjournal','bizpacreview',
-    'twitchy','thefederalist','cnsnews','theblaze','kbtx'];
+    'twitchy','thefederalist','cnsnews','theblaze','kbtx',
+    'newspub','newspub_live','newsbreak','bundle_app','theeagle',
+    'orlandoweekly','washingtonexaminer','the eagle','msn',
+    'yahoo','aol','flipboard','ground','patch','rawstory',
+    'dailykos','mediaite','thedailybeast','salon','alternet'];
   if (blocked.some(b => source.includes(b))) return true;
   if (['you won\'t believe','shocking','must see','goes viral'].some(s => title.includes(s))) return true;
   return false;
