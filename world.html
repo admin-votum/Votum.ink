@@ -1108,7 +1108,255 @@ async function loadWorldMap() {
   // Done — graticule, ocean labels and ships all added above
 }
 
-// PRO LOCK — disabled during development
+// SPACE LAYER — Real-time ISS + satellites
+async function initSpaceLayer() {
+  const svg = document.getElementById('world-map');
+  const {geoPath, geoNaturalEarth1} = await import('https://cdn.jsdelivr.net/npm/d3-geo@3/+esm');
+  const projection = geoNaturalEarth1().scale(153).translate([960/2 - 40, 500/2]);
+
+  // GEOSTATIONARY BELT — ring of satellites at 35,786km altitude
+  // Appears as arc along equator
+  const geoPoints = [];
+  for (let lon = -180; lon <= 180; lon += 2) {
+    const p = projection([lon, 0]);
+    if (p) geoPoints.push(p);
+  }
+  if (geoPoints.length > 1) {
+    const geoPath2 = geoPoints.map((p,i) => `${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    const geoBelt = document.createElementNS('http://www.w3.org/2000/svg','path');
+    geoBelt.setAttribute('d', geoPath2);
+    geoBelt.setAttribute('fill', 'none');
+    geoBelt.setAttribute('stroke', 'rgba(255,220,100,0.25)');
+    geoBelt.setAttribute('stroke-width', '3');
+    geoBelt.setAttribute('stroke-dasharray', '1,4');
+    geoBelt.setAttribute('pointer-events', 'none');
+    svg.appendChild(geoBelt);
+
+    // Label
+    const beltLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+    const midP = projection([160, 3]);
+    if (midP) {
+      beltLabel.setAttribute('x', midP[0]);
+      beltLabel.setAttribute('y', midP[1] - 6);
+      beltLabel.setAttribute('font-size', '7');
+      beltLabel.setAttribute('font-family', 'Inter, sans-serif');
+      beltLabel.setAttribute('fill', 'rgba(255,220,100,0.4)');
+      beltLabel.setAttribute('letter-spacing', '1.5');
+      beltLabel.setAttribute('text-anchor', 'middle');
+      beltLabel.setAttribute('pointer-events', 'none');
+      beltLabel.textContent = 'GEOSTATIONARY BELT · 35,786 KM';
+      svg.appendChild(beltLabel);
+    }
+  }
+
+  // POLAR ORBIT LINES — faint suggestion of polar orbiting satellites
+  const polarOrbits = [
+    {lon: 0},
+    {lon: 60},
+    {lon: 120},
+  ];
+
+  polarOrbits.forEach(({lon}) => {
+    const pts = [];
+    for (let lat = -85; lat <= 85; lat += 5) {
+      const p = projection([lon, lat]);
+      if (p) pts.push(p);
+    }
+    if (pts.length > 1) {
+      const d = pts.map((p,i) => `${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+      const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+      line.setAttribute('d', d);
+      line.setAttribute('fill', 'none');
+      line.setAttribute('stroke', 'rgba(255,255,255,0.06)');
+      line.setAttribute('stroke-width', '0.8');
+      line.setAttribute('stroke-dasharray', '2,6');
+      line.setAttribute('pointer-events', 'none');
+      svg.appendChild(line);
+    }
+  });
+
+  // HUBBLE ORBIT — inclined at 28.5°
+  const hubbleOrbit = [];
+  for (let t = 0; t <= 360; t += 3) {
+    const rad = t * Math.PI / 180;
+    const lat = 28.5 * Math.sin(rad);
+    const lon = (t * 1.4) % 360 - 180;
+    const p = projection([lon, lat]);
+    if (p) hubbleOrbit.push(p);
+  }
+  if (hubbleOrbit.length > 1) {
+    const d = hubbleOrbit.map((p,i) => `${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    const hubblePath = document.createElementNS('http://www.w3.org/2000/svg','path');
+    hubblePath.setAttribute('d', d);
+    hubblePath.setAttribute('fill', 'none');
+    hubblePath.setAttribute('stroke', 'rgba(150,200,255,0.15)');
+    hubblePath.setAttribute('stroke-width', '0.8');
+    hubblePath.setAttribute('stroke-dasharray', '3,5');
+    hubblePath.setAttribute('pointer-events', 'none');
+    svg.appendChild(hubblePath);
+  }
+
+  // ISS DOT — real position, updated every 5 seconds
+  const issGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+  issGroup.setAttribute('pointer-events','none');
+
+  // Glow rings
+  const issGlow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  issGlow.setAttribute('r','8');
+  issGlow.setAttribute('fill','none');
+  issGlow.setAttribute('stroke','rgba(100,200,255,0.2)');
+  issGlow.setAttribute('stroke-width','4');
+
+  const issGlow2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  issGlow2.setAttribute('r','5');
+  issGlow2.setAttribute('fill','none');
+  issGlow2.setAttribute('stroke','rgba(100,200,255,0.3)');
+  issGlow2.setAttribute('stroke-width','2');
+
+  const issDot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  issDot.setAttribute('r','3');
+  issDot.setAttribute('fill','rgba(150,220,255,0.95)');
+
+  // ISS trail
+  const issTrail = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  issTrail.setAttribute('fill','none');
+  issTrail.setAttribute('stroke','rgba(100,200,255,0.25)');
+  issTrail.setAttribute('stroke-width','1.5');
+  issTrail.setAttribute('stroke-linecap','round');
+
+  // ISS label
+  const issLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+  issLabel.setAttribute('font-size','8');
+  issLabel.setAttribute('font-family','Inter, sans-serif');
+  issLabel.setAttribute('fill','rgba(150,220,255,0.8)');
+  issLabel.setAttribute('letter-spacing','0.5');
+  issLabel.textContent='ISS';
+
+  issGroup.appendChild(issTrail);
+  issGroup.appendChild(issGlow);
+  issGroup.appendChild(issGlow2);
+  issGroup.appendChild(issDot);
+  issGroup.appendChild(issLabel);
+  svg.appendChild(issGroup);
+
+  // MOON DOT — approximate position
+  const moonDot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  moonDot.setAttribute('r','4');
+  moonDot.setAttribute('fill','rgba(255,255,220,0.7)');
+  moonDot.setAttribute('pointer-events','none');
+
+  const moonLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+  moonLabel.setAttribute('font-size','7');
+  moonLabel.setAttribute('font-family','Inter, sans-serif');
+  moonLabel.setAttribute('fill','rgba(255,255,200,0.5)');
+  moonLabel.setAttribute('letter-spacing','0.5');
+  moonLabel.setAttribute('pointer-events','none');
+  moonLabel.textContent='☽';
+
+  svg.appendChild(moonDot);
+  svg.appendChild(moonLabel);
+
+  // Approximate moon longitude based on date
+  function getMoonLon() {
+    const now = Date.now();
+    const lunarPeriod = 29.53 * 24 * 3600 * 1000;
+    const phase = (now % lunarPeriod) / lunarPeriod;
+    return (phase * 360) - 180;
+  }
+
+  function updateMoon() {
+    const lon = getMoonLon();
+    const lat = 5 * Math.sin(Date.now() / (27.3 * 24 * 3600 * 1000) * Math.PI * 2);
+    const p = projection([lon, lat]);
+    if (p) {
+      moonDot.setAttribute('cx', p[0]);
+      moonDot.setAttribute('cy', p[1]);
+      moonLabel.setAttribute('x', p[0] + 6);
+      moonLabel.setAttribute('y', p[1] + 3);
+    }
+  }
+
+  // ISS trail history
+  const issHistory = [];
+  const MAX_TRAIL = 12;
+
+  async function updateISS() {
+    try {
+      const res = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+      const data = await res.json();
+      const p = projection([data.longitude, data.latitude]);
+      if (!p) return;
+
+      issDot.setAttribute('cx', p[0]);
+      issDot.setAttribute('cy', p[1]);
+      issGlow.setAttribute('cx', p[0]);
+      issGlow.setAttribute('cy', p[1]);
+      issGlow2.setAttribute('cx', p[0]);
+      issGlow2.setAttribute('cy', p[1]);
+      issLabel.setAttribute('x', p[0] + 5);
+      issLabel.setAttribute('y', p[1] - 5);
+
+      // Trail
+      issHistory.push(`${p[0].toFixed(1)},${p[1].toFixed(1)}`);
+      if (issHistory.length > MAX_TRAIL) issHistory.shift();
+      issTrail.setAttribute('points', issHistory.join(' '));
+
+    } catch(e) { /* silent fail */ }
+  }
+
+  // ISS pulse animation
+  function pulseISS(ts) {
+    const scale = 1 + 0.3 * Math.sin(ts / 600);
+    issGlow.setAttribute('stroke-opacity', (0.15 + 0.1 * Math.sin(ts / 600)).toFixed(2));
+    requestAnimationFrame(pulseISS);
+  }
+  requestAnimationFrame(pulseISS);
+
+  // Update ISS every 5 seconds, moon every minute
+  updateISS();
+  updateMoon();
+  setInterval(updateISS, 5000);
+  setInterval(updateMoon, 60000);
+
+  // Space legend
+  const spaceLegend = document.createElementNS('http://www.w3.org/2000/svg','g');
+  spaceLegend.setAttribute('transform','translate(10, 455)');
+  spaceLegend.setAttribute('pointer-events','none');
+
+  const legendItems = [
+    {color:'rgba(150,220,255,0.8)', label:'ISS · Live position', dash:''},
+    {color:'rgba(255,220,100,0.4)', label:'Geostationary belt', dash:'1,4'},
+    {color:'rgba(150,200,255,0.3)', label:'Hubble orbit', dash:'3,5'},
+  ];
+
+  legendItems.forEach((item, i) => {
+    const x = i * 160;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', x); line.setAttribute('y1', 6);
+    line.setAttribute('x2', x+20); line.setAttribute('y2', 6);
+    line.setAttribute('stroke', item.color);
+    line.setAttribute('stroke-width', '1.5');
+    if (item.dash) line.setAttribute('stroke-dasharray', item.dash);
+    spaceLegend.appendChild(line);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x', x+26); text.setAttribute('y', 10);
+    text.setAttribute('font-size','8');
+    text.setAttribute('font-family','Inter, sans-serif');
+    text.setAttribute('fill','rgba(255,255,255,0.35)');
+    text.setAttribute('letter-spacing','0.5');
+    text.textContent = item.label;
+    spaceLegend.appendChild(text);
+  });
+
+  svg.appendChild(spaceLegend);
+}
+
+// Init space layer after map loads
+loadWorldMap()
+  .then(() => initSpaceLayer())
+  .catch(console.error);
+
 document.getElementById('pro-lock').style.display = 'none';
 document.getElementById('map-container').style.filter = 'none';
 document.getElementById('map-container').style.pointerEvents = 'all';
@@ -1123,10 +1371,6 @@ toggle.addEventListener('click', () => {
   toggle.textContent = dark?'☾':'☀';
   localStorage.setItem('votum-theme', dark?'dark':'light');
 });
-
-loadWorldMap().catch(console.error);
-
-
 
 </script>
 
