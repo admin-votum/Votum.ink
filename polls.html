@@ -199,6 +199,19 @@ header {
   font-size:11px; color:var(--muted); letter-spacing:0.04em;
   line-height:1.6;
 }
+
+/* FOOTER BOUNCE */
+.page-footer-nav {
+  animation: none;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+  opacity: 0;
+  transform: translateY(20px);
+}
+.page-footer-nav.bounced {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 </style>
 </head>
 <body>
@@ -431,7 +444,7 @@ renderRaces();
 </script>
 
 <!-- PAGE FOOTER NAV -->
-<div style="border-top:0.5px solid var(--border2);background:var(--surface);padding:28px;margin-top:20px;">
+<div class="page-footer-nav" style="border-top:0.5px solid var(--border2);background:var(--surface);padding:28px;margin-top:20px;">
   <div style="max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
     <div style="display:flex;gap:32px;flex-wrap:wrap;">
       <div>
@@ -460,5 +473,21 @@ renderRaces();
     </div>
   </div>
 </div>
+<script>
+// Footer bounce on scroll into view
+const footerNav = document.querySelector('.page-footer-nav');
+if (footerNav) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        footerNav.classList.add('bounced');
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.15 });
+  observer.observe(footerNav);
+}
+
+</script>
 </body>
 </html>
