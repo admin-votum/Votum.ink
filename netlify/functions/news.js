@@ -43,7 +43,8 @@ function isSpam(article) {
   const source = (article.source || '').toLowerCase();
   const title = (article.title || '').toLowerCase();
   const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
-  if (ageHours > 504) return true;
+  // Strict 3 day cutoff for freshness
+  if (ageHours > 72) return true;
   const blocked = ['hotair','wnd','arcamax','dailysignal','daily signal',
     'headtopics','natural news','naturalnews','oann','one america',
     'epoch times','townhall','redstate','pjmedia','frontpagemag',
@@ -73,14 +74,16 @@ const RSS_FEEDS = [
 
 async function fetchRSS(feed) {
   try {
-    // Use RSS2JSON service to parse RSS — free tier 10k/month
     const encoded = encodeURIComponent(feed.url);
-    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encoded}&count=8`);
+    const bust = Date.now();
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encoded}&count=8&_=${bust}`);
     const data = await res.json();
-
     if (data.status !== 'ok' || !data.items) return [];
 
-    return data.items.map(item => ({
+    // Sort by date descending before returning
+    const sorted = data.items.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+    return sorted.map(item => ({
       title: item.title,
       description: item.description?.replace(/<[^>]*>/g,'').slice(0,200) || '',
       url: item.link,
