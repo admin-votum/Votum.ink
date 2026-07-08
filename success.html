@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Votum Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#F7F5F0; --surface:#FFFFFF; --border2:rgba(0,0,0,0.13);
+  --text:#1A1A18; --muted:#6B6B65; --ink:#1A1A18;
+}
+body {
+  font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:40px;
+}
+.card {
+  background:var(--surface); border:0.5px solid var(--border2);
+  border-radius:16px; padding:48px 56px; max-width:480px; width:100%;
+  text-align:center; display:flex; flex-direction:column; gap:16px;
+}
+.glyph { font-family:'EB Garamond',serif; font-size:48px; color:var(--text); opacity:0.7; }
+.title { font-family:'EB Garamond',serif; font-size:32px; font-weight:500; color:var(--text); }
+.sub { font-size:14px; color:var(--muted); line-height:1.65; }
+.divider { height:0.5px; background:var(--border2); }
+.feature { font-size:13px; color:var(--text); display:flex; align-items:center; gap:10px; text-align:left; }
+.check { width:16px; height:16px; border-radius:50%; background:#2C2C28; color:#E8D5A3; display:flex; align-items:center; justify-content:center; font-size:9px; flex-shrink:0; }
+.btn {
+  display:block; padding:13px; background:#1A1A18; color:#F7F5F0;
+  border-radius:7px; font-size:12px; font-family:'Inter',sans-serif;
+  letter-spacing:0.06em; text-transform:uppercase; text-decoration:none;
+  transition:opacity 0.15s; margin-top:8px;
+}
+.btn:hover { opacity:0.82; }
+.btn-secondary {
+  display:block; padding:10px; background:none; color:var(--muted);
+  border:0.5px solid var(--border2); border-radius:7px;
+  font-size:12px; font-family:'Inter',sans-serif;
+  letter-spacing:0.06em; text-transform:uppercase; text-decoration:none;
+  transition:all 0.15s;
+}
+.btn-secondary:hover { color:var(--text); border-color:var(--text); }
+.loading { font-size:13px; color:var(--muted); }
+
+.wordmark-lambda {
+  font-family: 'EB Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+  opacity: 0.7;
+  margin-right: 2px;
+}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="loading">Confirming your subscription...</div>
+</div>
+
+<script>
+async function confirmSubscription() {
+  const card = document.getElementById('card');
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+
+  if (!sessionId) {
+    window.location.href = '/signup.html';
+    return;
+  }
+
+  try {
+    const res = await fetch('/.netlify/functions/verify-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId }),
+    });
+
+    const data = await res.json();
+
+    if (data.active) {
+      // Store email and pro status locally
+      localStorage.setItem('votum-pro', 'true');
+      localStorage.setItem('votum-email', data.email || '');
+
+      card.innerHTML = `
+        <div class="glyph">V</div>
+        <div class="title">Welcome to Votum Pro.</div>
+        <div class="sub">You're supporting bias-free global intelligence. Thank you — it matters more than you know.</div>
+        <div class="divider"></div>
+        <div class="feature"><div class="check">✓</div>World map — 190 countries unlocked</div>
+        <div class="feature"><div class="check">✓</div>ISS, Tiangong, Starlink live tracking</div>
+        <div class="feature"><div class="check">✓</div>Global news per country</div>
+        <div class="feature"><div class="check">✓</div>All US features included</div>
+        <div class="feature"><div class="check">✓</div>Supporting Votum.world — free for everyone</div>
+        <div class="divider"></div>
+        <a href="world.html" class="btn">Open world map →</a>
+        <a href="index.html" class="btn-secondary">Go to US map</a>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="glyph">·</div>
+        <div class="title">Something went wrong.</div>
+        <div class="sub">We couldn't confirm your subscription. Please reach out at hello@votum.ink and we'll sort it out immediately.</div>
+        <a href="signup.html" class="btn">Try again →</a>
+      `;
+    }
+  } catch(err) {
+    card.innerHTML = `
+      <div class="glyph">·</div>
+      <div class="title">Connection error.</div>
+      <div class="sub">Please email hello@votum.ink with your receipt and we'll manually activate your account.</div>
+      <a href="signup.html" class="btn-secondary">Back to signup</a>
+    `;
+  }
+}
+
+confirmSubscription();
+</script>
+</body>
+</html>
