@@ -1126,20 +1126,25 @@ toggle.addEventListener('click', () => {
 
 loadWorldMap().catch(console.error);
 
+
+
+</script>
+
+<script>
 // Footer bounce on scroll into view
-const footerNav = document.querySelector('.page-footer-nav');
-if (footerNav) {
+window.addEventListener('load', () => {
+  const footerNav = document.querySelector('.page-footer-nav');
+  if (!footerNav) return;
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        footerNav.classList.add('bounced');
+        setTimeout(() => footerNav.classList.add('bounced'), 100);
         observer.disconnect();
       }
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0.1 });
   observer.observe(footerNav);
-}
-
+});
 </script>
 </body>
 </html>
