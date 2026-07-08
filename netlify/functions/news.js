@@ -1,101 +1,34 @@
-// Source reach scoring — monthly unique readers (millions)
-// Handled inside getReach() function below
-
+// Source reach database
 function getReach(sourceName) {
   if (!sourceName) return 1;
   const n = sourceName.toLowerCase().trim();
 
-  // Exact or starts-with matches first to avoid false positives
   const exactMatches = {
-    'reuters': 185,
-    'associated press': 175,
-    'ap news': 175,
-    'the new york times': 150,
-    'new york times': 150,
-    'nytimes': 150,
-    'bbc news': 140,
-    'bbc': 140,
-    'cnn': 130,
-    'the washington post': 100,
-    'washington post': 100,
-    'fox news': 100,
-    'bloomberg': 90,
-    'usa today': 80,
-    'the guardian': 75,
-    'guardian': 75,
-    'nbc news': 70,
-    'abc news': 65,
-    'cbs news': 60,
-    'msnbc': 55,
-    'time': 55,
-    'newsweek': 52,
-    'huffpost': 50,
-    'politico': 45,
-    'new york post': 45,
-    'wall street journal': 40,
-    'axios': 40,
-    'npr': 38,
-    'the hill': 35,
-    'forbes': 70,
-    'business insider': 40,
-    'vox': 25,
-    'slate': 22,
-    'the atlantic': 20,
-    'atlantic': 20,
-    'national review': 15,
-    'daily wire': 18,
-    'breitbart': 12,
-    'daily beast': 12,
-    'the dispatch': 8,
-    'mother jones': 8,
-    'the intercept': 6,
-    'reason': 6,
-    'jacobin': 5,
-    'the federalist': 5,
-    'los angeles times': 20,
-    'la times': 20,
-    'chicago tribune': 8,
-    'boston globe': 8,
-    'miami herald': 6,
-    'philadelphia inquirer': 5,
-    'arizona republic': 4,
-    'dallas morning news': 5,
-    'detroit free press': 4,
-    'minneapolis star tribune': 3,
-    'atlanta journal-constitution': 8,
-    'ajc': 8,
-    'headtopics': 2,
-    'nogales international': 2,
-    'arizona capitol times': 2,
-    'azcapitoltimes': 2,
-    'east valley tribune': 2,
-    'eastvalleytribune': 2,
-    'standard speaker': 2,
-    'martinsvillebulletin': 2,
-    'florida phoenix': 2,
-    'michigan advance': 2,
-    'georgia recorder': 2,
-    'nevada current': 2,
-    'wisconsin examiner': 2,
-    'colorado sun': 2,
-    'minnesota reformer': 2,
-    'virginia mercury': 2,
-    'u.s. news': 15,
-    'us news': 15,
-    'usnews': 15,
-    'usatoday': 80,
-    'headtopics.com': 2,
+    'reuters': 185, 'associated press': 175, 'ap news': 175,
+    'the new york times': 150, 'new york times': 150, 'nytimes': 150,
+    'bbc news': 140, 'bbc': 140, 'cnn': 130,
+    'the washington post': 100, 'washington post': 100,
+    'fox news': 100, 'bloomberg': 90, 'usa today': 80,
+    'the guardian': 75, 'guardian': 75, 'nbc news': 70,
+    'abc news': 65, 'cbs news': 60, 'msnbc': 55,
+    'time': 55, 'newsweek': 52, 'huffpost': 50,
+    'politico': 45, 'new york post': 45, 'wall street journal': 40,
+    'axios': 40, 'npr': 38, 'the hill': 35, 'forbes': 70,
+    'business insider': 40, 'vox': 25, 'slate': 22,
+    'the atlantic': 20, 'atlantic': 20, 'national review': 15,
+    'daily wire': 18, 'breitbart': 12, 'daily beast': 12,
+    'the dispatch': 8, 'the intercept': 6, 'reason': 6,
+    'the federalist': 5, 'los angeles times': 20, 'chicago tribune': 8,
+    'boston globe': 8, 'miami herald': 6, 'arizona republic': 4,
+    'headtopics': 2, 'arizona capitol times': 2,
+    'u.s. news': 15, 'us news': 15,
   };
 
-  // Check exact match first
   if (exactMatches[n]) return exactMatches[n];
-
-  // Then check if source contains a key (for domain variations)
   for (const [key, reach] of Object.entries(exactMatches)) {
     if (key.length > 4 && n.includes(key)) return reach;
   }
-
-  return 2; // Unknown — low reach
+  return 2;
 }
 
 function rankScore(article) {
@@ -103,44 +36,61 @@ function rankScore(article) {
   const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
   const freshness = Math.max(0, 100 - (ageHours * 1.5));
   const reprint = Math.min(article.reprintCount || 0, 30);
-  // Reach weighted much more heavily to push high-credibility sources up
   return (reach * 0.70) + (freshness * 0.20) + (reprint * 0.10);
 }
 
 function isSpam(article) {
-  const reach = getReach(article.source);
-  const title = (article.title || '').toLowerCase();
   const source = (article.source || '').toLowerCase();
-
-  // Hard cutoff — articles older than 21 days are stale
+  const title = (article.title || '').toLowerCase();
   const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
   if (ageHours > 504) return true;
-
-  // Known low quality sources — explicit block list
   const blocked = ['hotair','wnd','arcamax','dailysignal','daily signal',
-    'headtopics','natural news','naturalnews','newsmax','oann','one america',
-    'epoch times','theepochtimes','breitbart news daily','townhall',
-    'redstate','pjmedia','pj media','frontpagemag','american thinker',
-    'thefederalist','lifesitenews','lifesite','westernjournal','western journal',
-    'bizpacreview','twitchy','tpusa','turning point','media research',
-    'mrc','cnsnews','washington examiner blog','the blaze','theblaze',
-    'rightwingwatch','mediaite blog','kbtx','local12','wkrc','fox4',
-    'fox5','fox6','fox7','fox8','fox13','fox17','fox19','fox26','fox29','fox32',
-    'fox35','fox40','fox43','fox44','fox45','fox46','fox47','fox59','wdrb',
-    'wate','wbir','wbtv','wdaf','wdef','wgal','wgn','whas','wiat','wisc',
-    'wjcl','wjla','wkbn','wkrn','wlbt','wlky','wlns','wlox','wlwt','wmaz',
-    'wmbf','wmtw','wnct','wnep','wnem','wnyt','wpbf','wpde','wpmi','wpri',
-    'wptz','wpxi','wrdw','wreg','wsav','wsbt','wsoc','wtae','wtaj','wthr',
-    'wtkr','wtoc','wtop','wtvd','wtvf','wtvr','wtvy','wvlt','wvtm','wwbt',
-    'wxia','wyff'];
-
+    'headtopics','natural news','naturalnews','oann','one america',
+    'epoch times','townhall','redstate','pjmedia','frontpagemag',
+    'american thinker','lifesitenews','westernjournal','bizpacreview',
+    'twitchy','thefederalist','cnsnews','theblaze','kbtx'];
   if (blocked.some(b => source.includes(b))) return true;
-
-  // Clickbait patterns
-  if (['you won\'t believe','shocking','must see','click here',
-       'goes viral','breaks internet'].some(s => title.includes(s))) return true;
-
+  if (['you won\'t believe','shocking','must see','goes viral'].some(s => title.includes(s))) return true;
   return false;
+}
+
+// RSS feeds — direct from source, free, unlimited, highest quality
+const RSS_FEEDS = [
+  // Tier 1 — Wire services
+  {url:'https://feeds.reuters.com/reuters/topNews', source:'Reuters', bias:'center'},
+  {url:'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source:'New York Times', bias:'left'},
+  {url:'http://feeds.bbci.co.uk/news/world/rss.xml', source:'BBC News', bias:'center-left'},
+  {url:'https://content.api.nytimes.com/svc/news/v3/all/recent.rss', source:'New York Times', bias:'left'},
+  {url:'https://www.theguardian.com/world/rss', source:'The Guardian', bias:'left'},
+  {url:'https://feeds.npr.org/1001/rss.xml', source:'NPR', bias:'center-left'},
+  {url:'https://feeds.washingtonpost.com/rss/world', source:'Washington Post', bias:'left'},
+  {url:'https://moxie.foxnews.com/google-publisher/politics.xml', source:'Fox News', bias:'right'},
+  {url:'https://feeds.a.dj.com/rss/RSSWorldNews.xml', source:'Wall Street Journal', bias:'center-right'},
+  {url:'https://www.politico.com/rss/politicopicks.xml', source:'Politico', bias:'center-left'},
+  {url:'https://axios.com/feeds/feed.rss', source:'Axios', bias:'center-left'},
+  {url:'https://thehill.com/rss/syndicator/19110', source:'The Hill', bias:'center'},
+];
+
+async function fetchRSS(feed) {
+  try {
+    // Use RSS2JSON service to parse RSS — free tier 10k/month
+    const encoded = encodeURIComponent(feed.url);
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encoded}&count=8`);
+    const data = await res.json();
+
+    if (data.status !== 'ok' || !data.items) return [];
+
+    return data.items.map(item => ({
+      title: item.title,
+      description: item.description?.replace(/<[^>]*>/g,'').slice(0,200) || '',
+      url: item.link,
+      image: item.thumbnail || item.enclosure?.link || null,
+      publishedAt: item.pubDate || new Date().toISOString(),
+      source: feed.source,
+      bias: feed.bias,
+      reprintCount: 0,
+    }));
+  } catch(e) { return []; }
 }
 
 exports.handler = async function(event) {
@@ -150,15 +100,37 @@ exports.handler = async function(event) {
     'Content-Type': 'application/json'
   };
 
-  const { state, max = 10 } = event.queryStringParameters || {};
+  const { state, max = 15 } = event.queryStringParameters || {};
   if (!state) return { statusCode: 400, headers, body: JSON.stringify({ error: 'state required' }) };
 
-  const q = encodeURIComponent(`${state} politics`);
+  const q = state.toLowerCase();
   const results = [];
 
+  // 1. Fetch from RSS feeds in parallel — highest quality, free
+  const rssPromises = RSS_FEEDS.slice(0, 6).map(feed => fetchRSS(feed));
+  const rssResults = await Promise.allSettled(rssPromises);
+
+  rssResults.forEach((result, i) => {
+    if (result.status === 'fulfilled') {
+      const feed = RSS_FEEDS[i];
+      result.value.forEach(article => {
+        // Filter for relevance to state/topic
+        const text = (article.title + ' ' + article.description).toLowerCase();
+        const isRelevant = text.includes(q) ||
+          q === 'us politics' || q === 'world news' ||
+          q.length > 8; // broad topic queries get all articles
+        if (isRelevant || results.length < 5) {
+          results.push(article);
+        }
+      });
+    }
+  });
+
+  // 2. Supplement with GNews for state-specific content
   try {
+    const qEncoded = encodeURIComponent(`${state} politics`);
     const gnewsRes = await fetch(
-      `https://gnews.io/api/v4/search?q=${q}&lang=en&country=us&max=${max}&token=${process.env.GNEWS_KEY}`
+      `https://gnews.io/api/v4/search?q=${qEncoded}&lang=en&country=us&max=10&token=${process.env.GNEWS_KEY}`
     );
     const gnews = await gnewsRes.json();
     (gnews.articles || []).forEach(a => results.push({
@@ -166,15 +138,15 @@ exports.handler = async function(event) {
       url: a.url, image: a.image,
       publishedAt: a.publishedAt,
       source: a.source?.name || 'Unknown',
-      reach: getReach(a.source?.name),
       reprintCount: 0,
-      state
     }));
   } catch(e) {}
 
+  // 3. Supplement with Newsdata
   try {
+    const qEncoded = encodeURIComponent(`${state} politics`);
     const ndRes = await fetch(
-      `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_KEY}&q=${q}&country=us&language=en&category=politics`
+      `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_KEY}&q=${qEncoded}&country=us&language=en&category=politics`
     );
     const nd = await ndRes.json();
     (nd.results || []).forEach(a => results.push({
@@ -182,15 +154,15 @@ exports.handler = async function(event) {
       url: a.link, image: a.image_url,
       publishedAt: a.pubDate,
       source: a.source_id || 'Unknown',
-      reach: getReach(a.source_id),
       reprintCount: 0,
-      state
     }));
   } catch(e) {}
 
+  // 4. Perigon for reach data
   try {
+    const qEncoded = encodeURIComponent(`${state} politics`);
     const pgRes = await fetch(
-      `https://api.goperigon.com/v1/all?q=${q}&country=us&language=en&sortBy=date&pageSize=${max}`,
+      `https://api.goperigon.com/v1/all?q=${qEncoded}&country=us&language=en&sortBy=date&pageSize=10`,
       { headers: { 'x-api-key': process.env.PERIGON_KEY } }
     );
     const pg = await pgRes.json();
@@ -199,16 +171,14 @@ exports.handler = async function(event) {
       url: a.url, image: a.imageUrl,
       publishedAt: a.publishedAt,
       source: a.source?.domain || 'Unknown',
-      reach: getReach(a.source?.domain),
       reprintCount: a.reprintCount || 0,
-      state
     }));
   } catch(e) {}
 
-  // Filter spam and dedupe by title
+  // Dedupe, filter spam, rank
   const seen = new Set();
   const deduped = results.filter(a => {
-    if (!a.title) return false;
+    if (!a.title || a.title.length < 15) return false;
     if (isSpam(a)) return false;
     const key = a.title.slice(0, 40).toLowerCase();
     if (seen.has(key)) return false;
@@ -216,14 +186,16 @@ exports.handler = async function(event) {
     return true;
   });
 
-  // Rank by reach + freshness + reprint count
   deduped.sort((a, b) => rankScore(b) - rankScore(a));
 
-  // Add rank metadata for UI display
-  const ranked = deduped.map(a => ({
+  const ranked = deduped.slice(0, parseInt(max)).map(a => ({
     ...a,
     rankScore: Math.round(rankScore(a))
   }));
 
-  return { statusCode: 200, headers, body: JSON.stringify({ articles: ranked }) };
+  return {
+    statusCode: 200,
+    headers,
+    body: JSON.stringify({ articles: ranked, total: ranked.length })
+  };
 };
