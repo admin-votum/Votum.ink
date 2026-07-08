@@ -74,25 +74,53 @@ const RSS_FEEDS = [
 
 async function fetchRSS(feed) {
   try {
-    const encoded = encodeURIComponent(feed.url);
-    const bust = Date.now();
-    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encoded}&count=8&_=${bust}`);
-    const data = await res.json();
-    if (data.status !== 'ok' || !data.items) return [];
+    const res = await fetch(feed.url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Votum/1.0; +https://votum.ink)',
+        'Accept': 'application/rss+xml, application/xml, text/xml'
+      }
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
 
-    // Sort by date descending before returning
-    const sorted = data.items.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+    // Parse RSS XML manually — no dependencies needed
+    const items = [];
+    const itemMatches = xml.matchAll(/<item[^>]*>([\s\S]*?)<\/item>/gi);
 
-    return sorted.map(item => ({
-      title: item.title,
-      description: item.description?.replace(/<[^>]*>/g,'').slice(0,200) || '',
-      url: item.link,
-      image: item.thumbnail || item.enclosure?.link || null,
-      publishedAt: item.pubDate || new Date().toISOString(),
-      source: feed.source,
-      bias: feed.bias,
-      reprintCount: 0,
-    }));
+    for (const match of itemMatches) {
+      const item = match[1];
+
+      const getTag = (tag) => {
+        const m = item.match(new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>|<${tag}[^>]*>([^<]*)<\\/${tag}>`, 'i'));
+        return m ? (m[1] || m[2] || '').trim() : '';
+      };
+
+      const title = getTag('title');
+      const link = getTag('link') || item.match(/<link[^>]*href="([^"]+)"/i)?.[1] || '';
+      const desc = getTag('description').replace(/<[^>]*>/g,'').slice(0,200);
+      const pubDate = getTag('pubDate') || getTag('dc:date') || '';
+      const image = item.match(/url="([^"]+\.(?:jpg|png|webp|jpeg)[^"]*)"/i)?.[1] ||
+                    item.match(/<media:content[^>]+url="([^"]+)"/i)?.[1] ||
+                    item.match(/<enclosure[^>]+url="([^"]+)"/i)?.[1] || null;
+
+      if (title && link) {
+        items.push({
+          title,
+          description: desc,
+          url: link,
+          image,
+          publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
+          source: feed.source,
+          bias: feed.bias,
+          reprintCount: 0,
+        });
+      }
+    }
+
+    // Sort newest first
+    items.sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    return items.slice(0, 8);
+
   } catch(e) { return []; }
 }
 
@@ -110,7 +138,7 @@ exports.handler = async function(event) {
   const results = [];
 
   // 1. Fetch from RSS feeds in parallel — highest quality, free
-  const rssPromises = RSS_FEEDS.slice(0, 6).map(feed => fetchRSS(feed));
+  const rssPromises = RSS_FEEDS.map(feed => fetchRSS(feed));
   const rssResults = await Promise.allSettled(rssPromises);
 
   rssResults.forEach((result, i) => {
