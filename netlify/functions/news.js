@@ -43,19 +43,59 @@ function isSpam(article) {
   const source = (article.source || '').toLowerCase();
   const title = (article.title || '').toLowerCase();
   const ageHours = (Date.now() - new Date(article.publishedAt)) / 3600000;
-  // Strict 3 day cutoff for freshness
+
+  // 72 hour freshness cutoff
   if (ageHours > 72) return true;
-  const blocked = ['hotair','wnd','arcamax','dailysignal','daily signal',
-    'headtopics','natural news','naturalnews','oann','one america',
-    'epoch times','townhall','redstate','pjmedia','frontpagemag',
-    'american thinker','lifesitenews','westernjournal','bizpacreview',
-    'twitchy','thefederalist','cnsnews','theblaze','kbtx',
-    'newspub','newspub_live','newsbreak','bundle_app','theeagle',
-    'orlandoweekly','washingtonexaminer','the eagle','msn',
-    'yahoo','aol','flipboard','ground','patch','rawstory',
-    'dailykos','mediaite','thedailybeast','salon','alternet'];
-  if (blocked.some(b => source.includes(b))) return true;
-  if (['you won\'t believe','shocking','must see','goes viral'].some(s => title.includes(s))) return true;
+
+  // Empty or too short
+  if (!article.title || article.title.length < 20) return true;
+
+  // TRUSTED sources — always allow
+  const TRUSTED = [
+    'reuters','associated press','ap news','bloomberg',
+    'new york times','nytimes','washington post','wall street journal',
+    'usa today','los angeles times','chicago tribune','boston globe',
+    'miami herald','seattle times','philadelphia inquirer',
+    'cnn','fox news','msnbc','nbc news','abc news','cbs news',
+    'npr','pbs','bbc','sky news',
+    'politico','axios','the hill','huffpost','vox','slate',
+    'the atlantic','new yorker','time','newsweek','forbes',
+    'business insider','national review','the dispatch','reason',
+    'the guardian','mother jones','the intercept','the nation',
+    'wired','ars technica','the verge','techcrunch',
+    'financial times','economist','foreign affairs','foreign policy',
+    'al jazeera','france 24','deutsche welle','haaretz',
+    'daily wire','breitbart','new york post','daily beast',
+    'washington examiner','free beacon','daily caller',
+    'newsweek','rolling stone','new republic',
+  ];
+
+  if (TRUSTED.some(t => source.includes(t))) return false;
+
+  // BLOCKED — junk, aggregators, spam
+  const BLOCKED = [
+    'newspub','newsbreak','bundle_app','theeagle','dddnews',
+    'emporiagazette','blackchronicle','hastingstribune',
+    'msn','yahoo','aol','flipboard','patch','ground.news',
+    'rawstory','dailykos','mediaite','alternet','infowars',
+    'hotair','wnd','arcamax','dailysignal','headtopics',
+    'naturalnews','oann','epoch times','townhall','redstate',
+    'pjmedia','frontpagemag','american thinker','lifesitenews',
+    'westernjournal','bizpacreview','twitchy','cnsnews','theblaze',
+    'sputnik','rt.com','globalresearch','zerohedge',
+    'gatewaypundit','thenewamerican','ijr','thepostmillennial',
+    'notthebee','louderwithcrowder','thefederalistpapers',
+    'orlandoweekly','newsmax',
+  ];
+
+  if (BLOCKED.some(b => source.includes(b))) return true;
+
+  // Clickbait patterns
+  if (['you won\'t believe','shocking','must see','goes viral',
+    'doctors hate','one weird trick','what happened next',
+    'this is why'].some(s => title.includes(s))) return true;
+
+  // Unknown sources get through but rank low via getReach returning 2
   return false;
 }
 
