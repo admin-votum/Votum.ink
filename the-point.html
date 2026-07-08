@@ -536,20 +536,22 @@ loadFeed();
 </div>
 
 
+
 <script>
-// Footer bounce on scroll into view
-window.addEventListener('load', () => {
-  const footerNav = document.querySelector('.page-footer-nav');
-  if (!footerNav) return;
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        setTimeout(() => footerNav.classList.add('bounced'), 100);
-        observer.disconnect();
-      }
-    });
-  }, { threshold: 0.1 });
-  observer.observe(footerNav);
+window.addEventListener('load', function() {
+  var footer = document.querySelector('.page-footer-nav');
+  if (!footer) return;
+  var triggered = false;
+  function checkFooter() {
+    if (triggered) return;
+    var rect = footer.getBoundingClientRect();
+    if (rect.top < window.innerHeight) {
+      triggered = true;
+      footer.classList.add('bounced');
+    }
+  }
+  window.addEventListener('scroll', checkFooter, {passive: true});
+  checkFooter();
 });
 </script>
 </body>
