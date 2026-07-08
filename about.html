@@ -254,7 +254,7 @@ header {
     <a class="nav-link" href="index.html">Map</a>
     <a class="nav-link" href="the-point.html">The Point</a>
     <a class="nav-link" href="#">Polls</a>
-    <a class="nav-link" href="#">Issues</a>
+    <a class="nav-link" href="issues.html">Issues</a>
     <a class="nav-link active" href="about.html">About</a>
     <button class="theme-toggle" id="theme-toggle">☀</button>
   </div>
@@ -394,5 +394,36 @@ toggle.addEventListener('click', () => {
   localStorage.setItem('votum-theme', dark ? 'dark' : 'light');
 });
 </script>
+
+<!-- PAGE FOOTER NAV -->
+<div style="border-top:0.5px solid var(--border2);background:var(--surface);padding:28px;margin-top:20px;">
+  <div style="max-width:900px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
+    <div style="display:flex;gap:32px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px;">Explore</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <a href="index.html" style="font-size:13px;color:var(--text);text-decoration:none">← US Map</a>
+          <a href="world.html" style="font-size:13px;color:var(--text);text-decoration:none">World Map <span style="font-size:9px;color:#8A6A2A">PRO</span></a>
+          <a href="the-point.html" style="font-size:13px;color:var(--text);text-decoration:none">The Point</a>
+          <a href="polls.html" style="font-size:13px;color:var(--text);text-decoration:none">Polls</a>
+          <a href="issues.html" style="font-size:13px;color:var(--text);text-decoration:none">Issues</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px;">Learn</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <a href="about.html" style="font-size:13px;color:var(--text);text-decoration:none">About Votum</a>
+          <a href="mailto:hello@votum.ink" style="font-size:13px;color:var(--text);text-decoration:none">Contact</a>
+          <a href="signup.html" style="font-size:13px;color:#8A6A2A;text-decoration:none;font-weight:500">Votum Pro →</a>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:'EB Garamond',serif;font-size:20px;color:var(--text);margin-bottom:4px;">Votum <span style="color:var(--muted);font-size:13px;font-family:Inter,sans-serif;font-weight:300;letter-spacing:0.1em">ink</span></div>
+      <div style="font-size:11px;color:var(--muted);">Bias-free global intelligence</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">© 2026 Votum.ink</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

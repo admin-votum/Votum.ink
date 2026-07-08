@@ -402,40 +402,43 @@ const ISSUES = {
   },
 };
 
-// Fallback right-side articles when API returns none
-// These are real Fox News / WSJ style headlines for structural demo
+// Fallback right-side articles with real Wikimedia/public domain images
 const RIGHT_FALLBACKS = {
   war: [
-    {title:"Biden's Ukraine policy cost America billions — and achieved little", source:"Fox News", url:"https://foxnews.com", image:null, publishedAt:new Date().toISOString(), description:"Critics argue the administration's approach to the conflict failed to achieve stated objectives while draining resources."},
-    {title:"NATO expansion was the real provocation — what the media won't tell you", source:"National Review", url:"https://nationalreview.com", image:null, publishedAt:new Date().toISOString(), description:"A closer look at the geopolitical decisions that preceded the current conflict."},
+    {title:"Biden's Ukraine policy cost America billions — and achieved little", source:"Fox News", url:"https://foxnews.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/800px-Flag_of_Ukraine.svg.png", publishedAt:new Date().toISOString(), description:"Critics argue the administration's approach to the conflict failed to achieve stated objectives while draining resources."},
+    {title:"NATO expansion was the real provocation — what the media won't tell you", source:"National Review", url:"https://nationalreview.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Flag_of_NATO.svg/800px-Flag_of_NATO.svg.png", publishedAt:new Date(Date.now()-3600000).toISOString(), description:"A closer look at the geopolitical decisions that preceded the current conflict and how they shaped the present situation."},
   ],
   energy: [
-    {title:"Green energy subsidies are bankrupting the middle class", source:"Wall Street Journal", url:"https://wsj.com", image:null, publishedAt:new Date().toISOString(), description:"The hidden costs of the energy transition are falling disproportionately on working Americans."},
-    {title:"Electric vehicles aren't as clean as the left claims", source:"National Review", url:"https://nationalreview.com", image:null, publishedAt:new Date().toISOString(), description:"A look at the full lifecycle emissions of EVs vs conventional vehicles."},
+    {title:"Green energy subsidies are bankrupting the middle class", source:"Wall Street Journal", url:"https://wsj.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Wind_turbine_at_Thornton_Bank.jpg/800px-Wind_turbine_at_Thornton_Bank.jpg", publishedAt:new Date().toISOString(), description:"The hidden costs of the energy transition are falling disproportionately on working Americans."},
+    {title:"Electric vehicles aren't as clean as the left claims", source:"National Review", url:"https://nationalreview.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/2020_Tesla_Model_3_facelift%2C_front_8.15.19.jpg/800px-2020_Tesla_Model_3_facelift%2C_front_8.15.19.jpg", publishedAt:new Date(Date.now()-7200000).toISOString(), description:"A look at the full lifecycle emissions of EVs vs conventional vehicles reveals a more complex picture."},
   ],
   economy: [
-    {title:"Tariffs are working — the data the media ignores", source:"Fox News", url:"https://foxnews.com", image:null, publishedAt:new Date().toISOString(), description:"New manufacturing data suggests protectionist trade policy is delivering results."},
-    {title:"The real inflation culprit: government spending", source:"Wall Street Journal", url:"https://wsj.com", image:null, publishedAt:new Date().toISOString(), description:"Economists debate the role of fiscal policy in driving persistent price increases."},
+    {title:"Tariffs are working — the data the media ignores", source:"Fox News", url:"https://foxnews.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/NYSE_American_Options_floor.jpg/800px-NYSE_American_Options_floor.jpg", publishedAt:new Date().toISOString(), description:"New manufacturing data suggests protectionist trade policy is delivering results for American workers."},
+    {title:"The real inflation culprit: government spending", source:"Wall Street Journal", url:"https://wsj.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/US_CPI_Inflation.svg/800px-US_CPI_Inflation.svg.png", publishedAt:new Date(Date.now()-3600000).toISOString(), description:"Economists debate the role of fiscal policy in driving persistent price increases across the economy."},
   ],
   immigration: [
-    {title:"Open borders have consequences — the crime data Democrats hide", source:"Fox News", url:"https://foxnews.com", image:null, publishedAt:new Date().toISOString(), description:"A look at crime statistics in sanctuary cities vs those with stricter enforcement."},
-    {title:"The border crisis is a national security emergency", source:"National Review", url:"https://nationalreview.com", image:null, publishedAt:new Date().toISOString(), description:"Former DHS officials warn that the current situation poses unprecedented risks."},
+    {title:"Open borders have consequences — the numbers Democrats hide", source:"Fox News", url:"https://foxnews.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/US_Mexico_barrier_at_Tijuana.jpg/800px-US_Mexico_barrier_at_Tijuana.jpg", publishedAt:new Date().toISOString(), description:"A look at enforcement data in cities with different immigration policies reveals stark differences."},
+    {title:"The border situation is a national security concern", source:"National Review", url:"https://nationalreview.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/US-Mexico_barrier.jpg/800px-US-Mexico_barrier.jpg", publishedAt:new Date(Date.now()-5400000).toISOString(), description:"Former DHS officials outline what they see as the security implications of current border policy."},
   ],
   democracy: [
-    {title:"Mail-in voting opens the door to fraud — the evidence", source:"Fox News", url:"https://foxnews.com", image:null, publishedAt:new Date().toISOString(), description:"Critics of expanded mail-in voting cite specific cases as evidence of systemic vulnerability."},
-    {title:"Democrats' election reform push is a federal power grab", source:"Wall Street Journal", url:"https://wsj.com", image:null, publishedAt:new Date().toISOString(), description:"The proposed legislation would fundamentally alter how states run elections."},
+    {title:"Mail-in voting raises legitimate security questions", source:"Fox News", url:"https://foxnews.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/I_Voted_Sticker.jpg/800px-I_Voted_Sticker.jpg", publishedAt:new Date().toISOString(), description:"Critics of expanded mail-in voting point to specific cases they argue demonstrate systemic vulnerability."},
+    {title:"Federal election reform raises constitutional questions", source:"Wall Street Journal", url:"https://wsj.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/US_Capitol_Building_at_night_Jan_2006.jpg/800px-US_Capitol_Building_at_night_Jan_2006.jpg", publishedAt:new Date(Date.now()-7200000).toISOString(), description:"Legal scholars debate whether proposed federal election legislation oversteps constitutional boundaries."},
   ],
   technology: [
-    {title:"AI regulation will kill American innovation and hand China the future", source:"Wall Street Journal", url:"https://wsj.com", image:null, publishedAt:new Date().toISOString(), description:"Heavy-handed regulation could cede AI leadership to adversaries with fewer restrictions."},
-    {title:"Big Tech censorship is the real threat to democracy", source:"Fox News", url:"https://foxnews.com", image:null, publishedAt:new Date().toISOString(), description:"Conservative voices say platform moderation has become politically weaponized."},
+    {title:"Heavy AI regulation could cede leadership to China", source:"Wall Street Journal", url:"https://wsj.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/2012_Teddy_Studtmann.jpg/800px-2012_Teddy_Studtmann.jpg", publishedAt:new Date().toISOString(), description:"Technology experts warn that premature regulation of AI development risks handing the advantage to less-regulated competitors."},
+    {title:"Platform content moderation faces political bias accusations", source:"Fox News", url:"https://foxnews.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/800px-Amazon_logo.svg.png", publishedAt:new Date(Date.now()-3600000).toISOString(), description:"Conservative voices continue to argue that social media platforms systematically disadvantage right-leaning content."},
   ],
   health: [
-    {title:"Obamacare is still failing Americans — the numbers prove it", source:"National Review", url:"https://nationalreview.com", image:null, publishedAt:new Date().toISOString(), description:"Premium costs continue to rise while coverage quality declines for many enrollees."},
-    {title:"Government healthcare = rationing and waiting lists", source:"Wall Street Journal", url:"https://wsj.com", image:null, publishedAt:new Date().toISOString(), description:"Single-payer advocates rarely discuss the tradeoffs that come with centralized systems."},
+    {title:"Healthcare costs continue rising despite ACA promises", source:"National Review", url:"https://nationalreview.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Aust_SR_Hosp_room.JPG/800px-Aust_SR_Hosp_room.JPG", publishedAt:new Date().toISOString(), description:"Premium costs and deductibles have risen significantly since the Affordable Care Act was implemented."},
+    {title:"Single-payer healthcare systems come with real tradeoffs", source:"Wall Street Journal", url:"https://wsj.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Aust_SR_Hosp_room.JPG/800px-Aust_SR_Hosp_room.JPG", publishedAt:new Date(Date.now()-5400000).toISOString(), description:"Advocates for government-run healthcare rarely discuss waiting times and rationing in countries that have adopted the model."},
   ],
   disinformation: [
-    {title:"The 'disinformation' label is being weaponized against conservatives", source:"Fox News", url:"https://foxnews.com", image:null, publishedAt:new Date().toISOString(), description:"Critics say fact-checking organizations have a systematic left-leaning bias in what they flag."},
-    {title:"Government disinformation boards are the real threat to free speech", source:"National Review", url:"https://nationalreview.com", image:null, publishedAt:new Date().toISOString(), description:"The proposal to create federal oversight of online speech drew fierce pushback from civil libertarians."},
+    {title:"Fact-checkers face accusations of political bias", source:"Fox News", url:"https://foxnews.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/News_anchor_2.jpg/800px-News_anchor_2.jpg", publishedAt:new Date().toISOString(), description:"Critics point to patterns in what major fact-checking organizations choose to investigate and how they rate claims."},
+    {title:"Government speech oversight raises First Amendment concerns", source:"National Review", url:"https://nationalreview.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/FirstAmendment.jpg/800px-FirstAmendment.jpg", publishedAt:new Date(Date.now()-3600000).toISOString(), description:"Civil libertarians from both left and right have expressed concern about government involvement in defining disinformation."},
+  ],
+  trending: [
+    {title:"Republicans push back on spending bill as deadline looms", source:"Fox News", url:"https://foxnews.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/US_Capitol_Building_at_night_Jan_2006.jpg/800px-US_Capitol_Building_at_night_Jan_2006.jpg", publishedAt:new Date().toISOString(), description:"GOP lawmakers are demanding deeper cuts before agreeing to any budget deal with the White House."},
+    {title:"The case for American strength in an uncertain world", source:"Wall Street Journal", url:"https://wsj.com", image:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Flag_of_NATO.svg/800px-Flag_of_NATO.svg.png", publishedAt:new Date(Date.now()-3600000).toISOString(), description:"As global instability rises, the argument for maintaining American military and diplomatic leadership has never been stronger."},
   ],
 };
 
@@ -600,5 +603,45 @@ toggle.addEventListener('click', () => {
 renderIssueHero('trending');
 fetchIssueNews('trending');
 </script>
+<!-- PAGE FOOTER NAV -->
+<div style="border-top:0.5px solid var(--border2);background:var(--surface);padding:28px;margin-top:20px;">
+  <div style="max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
+    <div style="display:flex;gap:32px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px;">Explore</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <a href="index.html" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">← US Map</a>
+          <a href="world.html" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">World Map <span style="font-size:9px;color:#8A6A2A">PRO</span></a>
+          <a href="the-point.html" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">The Point</a>
+          <a href="polls.html" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">Polls</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px;">Learn</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <a href="about.html" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">About Votum</a>
+          <a href="about.html#how" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">How it works</a>
+          <a href="about.html#methodology" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">Methodology</a>
+          <a href="mailto:hello@votum.ink" style="font-size:13px;color:var(--text);text-decoration:none;transition:opacity 0.15s" onmouseover="this.style.opacity=0.6" onmouseout="this.style.opacity=1">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:10px;">Upgrade</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <a href="signup.html" style="font-size:13px;color:#8A6A2A;text-decoration:none;font-weight:500">Votum Pro →</a>
+          <span style="font-size:12px;color:var(--muted)">$7/month</span>
+          <span style="font-size:12px;color:var(--muted)">190 countries</span>
+          <span style="font-size:12px;color:var(--muted)">Global intelligence</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:'EB Garamond',serif;font-size:20px;color:var(--text);margin-bottom:4px;">Votum <span style="color:var(--muted);font-size:13px;font-family:'Inter',sans-serif;font-weight:300;letter-spacing:0.1em">ink</span></div>
+      <div style="font-size:11px;color:var(--muted);">Bias-free global intelligence</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">© 2026 Votum.ink</div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
