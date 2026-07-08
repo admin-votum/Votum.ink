@@ -185,27 +185,20 @@ exports.handler = async function(event) {
   const rssPromises = RSS_FEEDS.map(feed => fetchRSS(feed));
   const rssResults = await Promise.allSettled(rssPromises);
 
+  // No relevance filter — return best stories from all major outlets
+  // ranked by source credibility + freshness. State is context not keyword filter.
   rssResults.forEach((result, i) => {
     if (result.status === 'fulfilled') {
-      const feed = RSS_FEEDS[i];
       result.value.forEach(article => {
-        // Filter for relevance to state/topic
-        const text = (article.title + ' ' + article.description).toLowerCase();
-        const isRelevant = text.includes(q) ||
-          q === 'us politics' || q === 'world news' ||
-          q.length > 8; // broad topic queries get all articles
-        if (isRelevant || results.length < 5) {
-          results.push(article);
-        }
+        results.push(article);
       });
     }
   });
 
-  // 2. Supplement with GNews for state-specific content
+  // 2. Supplement with GNews — top US political news
   try {
-    const qEncoded = encodeURIComponent(`${state} politics`);
     const gnewsRes = await fetch(
-      `https://gnews.io/api/v4/search?q=${qEncoded}&lang=en&country=us&max=10&token=${process.env.GNEWS_KEY}`
+      `https://gnews.io/api/v4/top-headlines?topic=nation&lang=en&country=us&max=10&token=${process.env.GNEWS_KEY}`
     );
     const gnews = await gnewsRes.json();
     (gnews.articles || []).forEach(a => results.push({
@@ -217,11 +210,10 @@ exports.handler = async function(event) {
     }));
   } catch(e) {}
 
-  // 3. Supplement with Newsdata
+  // 3. Supplement with Newsdata — top politics
   try {
-    const qEncoded = encodeURIComponent(`${state} politics`);
     const ndRes = await fetch(
-      `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_KEY}&q=${qEncoded}&country=us&language=en&category=politics`
+      `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_KEY}&country=us&language=en&category=politics`
     );
     const nd = await ndRes.json();
     (nd.results || []).forEach(a => results.push({
