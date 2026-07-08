@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Issues — Votum</title>
+<script src="i18n.js" defer></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE6;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.13);
+  --text: #1A1A18; --muted: #6B6B65; --ink: #1A1A18;
+  --dem: #3A6B9E; --rep: #B94040;
+}
+[data-theme="dark"] {
+  --bg: #0E0E0C; --surface: #161614; --surface2: #1E1E1B;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.11);
+  --text: #EDEAE2; --muted: #7A7A72; --ink: #EDEAE2;
+  --dem: #4A86BF; --rep: #C9534F;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; display: flex; flex-direction: column;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* HEADER */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 52px;
+  border-bottom: 0.5px solid var(--border2);
+  background: var(--surface); flex-shrink: 0;
+  position: sticky; top: 0; z-index: 100;
+  transition: background 0.3s;
+}
+.wordmark {
+  font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 500;
+  color: var(--ink); display: flex; align-items: baseline; gap: 8px; text-decoration: none;
+}
+.wordmark-dot { width:5px; height:5px; border-radius:50%; background:var(--ink); margin-bottom:2px; flex-shrink:0; }
+.wordmark-sub { font-family:'Inter',sans-serif; font-size:11px; font-weight:300; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+.nav-links { display:flex; gap:20px; align-items:center; }
+.nav-link { font-size:12px; color:var(--muted); letter-spacing:0.04em; cursor:pointer; text-decoration:none; transition:color 0.15s; }
+.nav-link:hover { color:var(--text); }
+.nav-link.active { color:var(--text); border-bottom:1px solid var(--border2); padding-bottom:1px; }
+.theme-toggle {
+  background:none; border:0.5px solid var(--border2); color:var(--muted);
+  width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px;
+  display:flex; align-items:center; justify-content:center; transition:all 0.2s; margin-left:8px;
+}
+.theme-toggle:hover { color:var(--text); border-color:var(--text); }
+
+/* HERO */
+.page-hero { padding:40px 28px 28px; max-width:1200px; margin:0 auto; width:100%; }
+.page-label { font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--muted); margin-bottom:10px; }
+.page-title { font-family:'EB Garamond',serif; font-size:38px; font-weight:500; line-height:1.15; color:var(--text); margin-bottom:10px; }
+.page-sub { font-size:14px; color:var(--muted); line-height:1.6; max-width:560px; }
+
+/* ISSUE TABS */
+.issue-tabs {
+  max-width:1200px; margin:0 auto; width:100%;
+  padding:0 28px 28px;
+  display:flex; gap:6px; flex-wrap:wrap; align-items:center;
+}
+.issue-tab {
+  background:none; border:0.5px solid var(--border2); color:var(--muted);
+  font-size:12px; font-family:'Inter',sans-serif; padding:6px 16px;
+  border-radius:20px; cursor:pointer; letter-spacing:0.04em; transition:all 0.15s;
+  display:flex; align-items:center; gap:6px;
+}
+.issue-tab:hover { color:var(--text); border-color:var(--text); }
+.issue-tab.active { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.issue-icon { font-size:14px; }
+
+/* ISSUE HERO — large topic header */
+.issue-hero {
+  max-width:1200px; margin:0 auto; width:100%;
+  padding:0 28px 32px;
+}
+.issue-hero-inner {
+  background:var(--surface);
+  border:0.5px solid var(--border2);
+  border-radius:12px;
+  padding:28px 32px;
+  display:flex;
+  align-items:flex-start;
+  gap:32px;
+}
+.issue-hero-left { flex:1; }
+.issue-hero-icon { font-size:36px; margin-bottom:12px; display:block; }
+.issue-hero-title {
+  font-family:'EB Garamond',serif; font-size:28px; font-weight:500;
+  color:var(--text); margin-bottom:8px; line-height:1.2;
+}
+.issue-hero-desc {
+  font-size:14px; color:var(--muted); line-height:1.65; max-width:480px;
+}
+.issue-hero-right {
+  display:flex; flex-direction:column; gap:10px; min-width:220px;
+}
+.issue-stat {
+  background:var(--surface2); border-radius:8px; padding:12px 16px;
+}
+.issue-stat-label { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:4px; }
+.issue-stat-value { font-family:'EB Garamond',serif; font-size:18px; font-weight:500; color:var(--text); }
+.issue-stat-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* SPLIT FEED */
+.split-feed {
+  max-width:1200px; margin:0 auto; width:100%;
+  padding:0 28px 80px;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+
+.split-label-row {
+  display:grid;
+  grid-template-columns:1fr 80px 1fr;
+  gap:0 16px;
+  padding:10px 0;
+  border-bottom:0.5px solid var(--border);
+  margin-bottom:0;
+}
+.split-side-label {
+  font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted);
+}
+.split-side-label.right { text-align:right; }
+
+/* SPLIT ARTICLE PAIR */
+.split-pair {
+  display:grid;
+  grid-template-columns:1fr 80px 1fr;
+  gap:0 16px;
+  padding:24px 0;
+  border-bottom:0.5px solid var(--border);
+  align-items:start;
+}
+.split-pair:hover .split-center-dot { background:var(--text); }
+
+/* ARTICLE CARD — large */
+.split-article {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  cursor:pointer;
+  transition:opacity 0.15s;
+}
+.split-article:hover { opacity:0.85; }
+
+.split-img {
+  width:100%; aspect-ratio:16/9; object-fit:cover;
+  border-radius:8px; background:var(--surface2); display:block;
+}
+.split-img-placeholder {
+  width:100%; aspect-ratio:16/9; border-radius:8px;
+  background:var(--surface2); display:flex; align-items:center;
+  justify-content:center; font-family:'EB Garamond',serif;
+  font-size:32px; color:var(--muted); opacity:0.2;
+}
+.split-source-row { display:flex; align-items:center; gap:6px; }
+.bias-pip { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.pip-left { background:#3A6B9E; }
+.pip-center-left { background:#7A9FBF; }
+.pip-center { background:#7A8A6A; }
+.pip-center-right { background:#BF9A6A; }
+.pip-right { background:#B94040; }
+.split-source-name { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); }
+.split-headline {
+  font-family:'EB Garamond',serif; font-size:20px; font-weight:400;
+  line-height:1.38; color:var(--text);
+}
+.split-desc { font-size:13px; color:var(--muted); line-height:1.6; }
+.split-time { font-size:11px; color:var(--muted); }
+.split-read {
+  font-size:11px; color:var(--muted); text-decoration:none;
+  letter-spacing:0.04em; transition:color 0.15s; display:inline-flex;
+  align-items:center; gap:4px;
+}
+.split-read:hover { color:var(--text); }
+
+/* CENTER COLUMN */
+.split-center {
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px; padding-top:4px;
+}
+.split-center-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--border2); flex-shrink:0;
+  transition:background 0.15s;
+}
+.split-center-line {
+  width:1px; flex:1; background:var(--border); min-height:40px;
+}
+.split-vs {
+  font-size:9px; text-transform:uppercase; letter-spacing:0.1em;
+  color:var(--muted); writing-mode:vertical-rl;
+  transform:rotate(180deg); opacity:0.5;
+}
+
+/* LOADING */
+.split-loading {
+  max-width:1200px; margin:0 auto; width:100%;
+  padding:40px 28px;
+  display:flex; flex-direction:column; gap:32px;
+}
+.skel-pair {
+  display:grid; grid-template-columns:1fr 80px 1fr; gap:0 16px;
+}
+.skel { height:12px; border-radius:4px; background:var(--surface2); animation:skel-pulse 1.4s ease-in-out infinite; margin-bottom:8px; }
+.skel-img { border-radius:8px; background:var(--surface2); aspect-ratio:16/9; animation:skel-pulse 1.4s ease-in-out infinite; margin-bottom:10px; }
+@keyframes skel-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+.empty-state { text-align:center; padding:60px; color:var(--muted); }
+.empty-glyph { font-family:'EB Garamond',serif; font-size:48px; opacity:0.15; margin-bottom:12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="wordmark" href="index.html">
+    Votum <div class="wordmark-dot"></div> <span class="wordmark-sub">ink</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">Map</a>
+    <a class="nav-link" href="world.html">World <span style="font-size:9px;color:#8A6A2A">PRO</span></a>
+    <a class="nav-link" href="the-point.html">The Point</a>
+    <a class="nav-link" href="polls.html">Polls</a>
+    <a class="nav-link active" href="issues.html">Issues</a>
+    <a class="nav-link" href="about.html">About</a>
+    <a class="nav-link" href="signup.html" style="color:#8A6A2A;font-weight:500">Pro →</a>
+    <button class="theme-toggle" id="theme-toggle">☀</button>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="page-label">Votum · Issues</div>
+  <div class="page-title">The defining debates.</div>
+  <div class="page-sub">The stories that shape the world — covered from every angle. Left and right, side by side. No adjudication. The gap between them is the story.</div>
+</div>
+
+<div class="issue-tabs" id="issue-tabs">
+  <button class="issue-tab active" data-issue="war">
+    <span class="issue-icon">⚔</span> War & Conflict
+  </button>
+  <button class="issue-tab" data-issue="energy">
+    <span class="issue-icon">⚡</span> Energy & Climate
+  </button>
+  <button class="issue-tab" data-issue="economy">
+    <span class="issue-icon">📈</span> Economy & Trade
+  </button>
+  <button class="issue-tab" data-issue="immigration">
+    <span class="issue-icon">🌐</span> Immigration
+  </button>
+  <button class="issue-tab" data-issue="democracy">
+    <span class="issue-icon">🗳</span> Democracy
+  </button>
+  <button class="issue-tab" data-issue="technology">
+    <span class="issue-icon">💡</span> Technology & AI
+  </button>
+  <button class="issue-tab" data-issue="health">
+    <span class="issue-icon">🏥</span> Health
+  </button>
+  <button class="issue-tab" data-issue="disinformation">
+    <span class="issue-icon">📡</span> Disinformation
+  </button>
+</div>
+
+<div class="issue-hero" id="issue-hero"></div>
+
+<div class="split-feed" id="split-feed">
+  <div class="split-loading" id="split-loading">
+    <div class="skel-pair">
+      <div><div class="skel-img"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:60%;animation-delay:0.1s"></div></div>
+      <div></div>
+      <div><div class="skel-img" style="animation-delay:0.15s"></div><div class="skel" style="width:75%;animation-delay:0.15s"></div><div class="skel" style="width:55%;animation-delay:0.25s"></div></div>
+    </div>
+    <div class="skel-pair">
+      <div><div class="skel-img" style="animation-delay:0.1s"></div><div class="skel" style="width:85%;animation-delay:0.1s"></div><div class="skel" style="width:65%;animation-delay:0.2s"></div></div>
+      <div></div>
+      <div><div class="skel-img" style="animation-delay:0.2s"></div><div class="skel" style="width:70%;animation-delay:0.2s"></div><div class="skel" style="width:50%;animation-delay:0.3s"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ISSUES = {
+  war: {
+    icon: '⚔',
+    title: 'War & Conflict',
+    desc: 'Active conflicts, geopolitical flashpoints, and the human cost of war. Coverage from all sides of every front line — because in conflict, perspective is everything.',
+    stats: [
+      {label:'Active conflicts', value:'40+', sub:'Worldwide in 2026'},
+      {label:'Coverage sources', sub:'Left · Center · Right'},
+    ],
+    queries: ['Ukraine Russia war', 'Gaza conflict', 'Sudan war', 'global conflict 2026'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+  energy: {
+    icon: '⚡',
+    title: 'Energy & Climate',
+    desc: 'The energy transition, fossil fuels, climate policy, and the real economics behind it all. Legitimate disagreement exists here — you should see all of it.',
+    stats: [
+      {label:'Global temp rise', value:'1.2°C', sub:'Above pre-industrial levels'},
+      {label:'Renewable share', value:'30%', sub:'Of global electricity 2025'},
+    ],
+    queries: ['energy policy climate', 'fossil fuels renewable energy', 'climate legislation'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+  economy: {
+    icon: '📈',
+    title: 'Economy & Trade',
+    desc: 'Tariffs, inflation, inequality, trade wars, and what the numbers actually mean for people. Economics without the ideology.',
+    stats: [
+      {label:'US inflation', value:'3.1%', sub:'CPI April 2026'},
+      {label:'Trade deficit', value:'$74B', sub:'Monthly avg 2026'},
+    ],
+    queries: ['economy trade tariffs 2026', 'inflation unemployment', 'trade war China US'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+  immigration: {
+    icon: '🌐',
+    title: 'Immigration',
+    desc: 'Border policy, asylum law, migration flows, and the human stories behind the numbers. One of the most covered and least understood issues in politics.',
+    stats: [
+      {label:'Border crossings', value:'1.2M', sub:'FY2026 to date'},
+      {label:'Pending asylum', value:'3.7M', sub:'Cases in US courts'},
+    ],
+    queries: ['immigration border policy 2026', 'asylum seekers migrants', 'immigration reform'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+  democracy: {
+    icon: '🗳',
+    title: 'Democracy & Elections',
+    desc: 'Voting rights, election integrity, democratic backsliding worldwide. The mechanics of how power is obtained and held.',
+    stats: [
+      {label:'Elections in 2026', value:'60+', sub:'Countries worldwide'},
+      {label:'At-risk democracies', value:'42', sub:'Freedom House 2026'},
+    ],
+    queries: ['democracy elections voting rights 2026', 'election integrity', 'democratic backsliding'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+  technology: {
+    icon: '💡',
+    title: 'Technology & AI',
+    desc: 'AI regulation, tech concentration of power, labor displacement, copyright battles, and what actually changes when these technologies mature.',
+    stats: [
+      {label:'AI regulation bills', value:'150+', sub:'Introduced globally 2026'},
+      {label:'Tech market cap', value:'$18T', sub:'Top 5 companies combined'},
+    ],
+    queries: ['AI regulation technology policy 2026', 'artificial intelligence legislation', 'tech antitrust'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+  health: {
+    icon: '🏥',
+    title: 'Health & Medicine',
+    desc: 'Drug pricing, healthcare access, public health policy, and the systems that determine who gets care. Data-driven, globally sourced.',
+    stats: [
+      {label:'Uninsured in US', value:'26M', sub:'As of 2026'},
+      {label:'Drug price gap', value:'3x', sub:'US vs OECD average'},
+    ],
+    queries: ['healthcare policy 2026', 'drug pricing medicine', 'public health Medicaid'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+  disinformation: {
+    icon: '📡',
+    title: 'Disinformation',
+    desc: 'How false narratives spread, who benefits, and what platforms and governments are doing about it. Essential context for everything else on this site.',
+    stats: [
+      {label:'False stories/day', value:'10K+', sub:'Flagged across platforms'},
+      {label:'Trust in media', value:'32%', sub:'Gallup 2026'},
+    ],
+    queries: ['disinformation misinformation media 2026', 'fake news propaganda', 'media trust'],
+    leftBias: ['left','center-left'],
+    rightBias: ['right','center-right'],
+  },
+};
+
+const GNEWS_KEY = '50fb32ffd92d7dfa4466b81f3e30f834';
+let activeIssue = 'war';
+let allArticles = [];
+
+function guessBias(n='') {
+  n = n.toLowerCase();
+  if (['fox news','breitbart','national review','new york post','daily wire','the federalist'].some(s=>n.includes(s))) return {bias:'right',pip:'pip-right'};
+  if (['wall street journal','dispatch','reason'].some(s=>n.includes(s))) return {bias:'center-right',pip:'pip-center-right'};
+  if (['new york times','washington post','msnbc','atlantic','guardian','vox','npr','axios'].some(s=>n.includes(s))) return {bias:'left',pip:'pip-left'};
+  if (['reuters','ap news','the hill','bloomberg','politico'].some(s=>n.includes(s))) return {bias:'center',pip:'pip-center'};
+  return {bias:'center-left',pip:'pip-center-left'};
+}
+
+function timeAgo(d) {
+  if (!d) return '—';
+  const diff = Math.floor((Date.now()-new Date(d))/60000);
+  if (diff<60) return `${diff}m ago`;
+  if (diff<1440) return `${Math.floor(diff/60)}h ago`;
+  return `${Math.floor(diff/1440)}d ago`;
+}
+
+function renderIssueHero(issue) {
+  const info = ISSUES[issue];
+  const hero = document.getElementById('issue-hero');
+  hero.innerHTML = `
+    <div class="issue-hero-inner">
+      <div class="issue-hero-left">
+        <span class="issue-hero-icon">${info.icon}</span>
+        <div class="issue-hero-title">${info.title}</div>
+        <div class="issue-hero-desc">${info.desc}</div>
+      </div>
+      <div class="issue-hero-right">
+        ${info.stats.map(s => `
+          <div class="issue-stat">
+            <div class="issue-stat-label">${s.label}</div>
+            ${s.value ? `<div class="issue-stat-value">${s.value}</div>` : ''}
+            <div class="issue-stat-sub">${s.sub}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+async function fetchIssueNews(issue) {
+  const info = ISSUES[issue];
+  const feed = document.getElementById('split-feed');
+
+  // Show loading
+  feed.innerHTML = `<div class="split-loading">
+    <div class="skel-pair"><div><div class="skel-img"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:60%"></div></div><div></div><div><div class="skel-img" style="animation-delay:0.15s"></div><div class="skel" style="width:75%;animation-delay:0.15s"></div><div class="skel" style="width:55%;animation-delay:0.25s"></div></div></div>
+    <div class="skel-pair"><div><div class="skel-img" style="animation-delay:0.1s"></div><div class="skel" style="width:85%;animation-delay:0.1s"></div><div class="skel" style="width:65%;animation-delay:0.2s"></div></div><div></div><div><div class="skel-img" style="animation-delay:0.2s"></div><div class="skel" style="width:70%;animation-delay:0.2s"></div><div class="skel" style="width:50%;animation-delay:0.3s"></div></div></div>
+  </div>`;
+
+  try {
+    // Fetch from our secure function
+    const res = await fetch(`/.netlify/functions/news?state=${encodeURIComponent(info.queries[0])}&max=20`);
+    const data = await res.json();
+    allArticles = data.articles || [];
+
+    if (!allArticles.length) throw new Error('No articles');
+    renderSplitFeed(allArticles, info);
+
+  } catch(err) {
+    feed.innerHTML = '<div class="empty-state"><div class="empty-glyph">·</div><p style="color:var(--muted);font-size:13px">No articles found for this issue right now</p></div>';
+  }
+}
+
+function renderSplitFeed(articles, info) {
+  const feed = document.getElementById('split-feed');
+  feed.innerHTML = '';
+
+  // Separate by lean
+  const left = articles.filter(a => info.leftBias.includes(guessBias(a.source).bias));
+  const right = articles.filter(a => info.rightBias.includes(guessBias(a.source).bias));
+  const center = articles.filter(a => guessBias(a.source).bias === 'center');
+
+  // Pair them up — left article opposite right article
+  const pairs = Math.max(left.length, right.length, 3);
+
+  // Label row
+  const labelRow = document.createElement('div');
+  labelRow.className = 'split-label-row';
+  labelRow.innerHTML = `
+    <div class="split-side-label">Left & Center-left</div>
+    <div></div>
+    <div class="split-side-label right">Right & Center-right</div>
+  `;
+  feed.appendChild(labelRow);
+
+  for (let i = 0; i < Math.min(pairs, 6); i++) {
+    const leftArt = left[i] || center[i] || null;
+    const rightArt = right[i] || null;
+    if (!leftArt && !rightArt) continue;
+
+    const pair = document.createElement('div');
+    pair.className = 'split-pair';
+
+    pair.innerHTML = `
+      ${leftArt ? articleHTML(leftArt) : '<div></div>'}
+      <div class="split-center">
+        <div class="split-center-dot"></div>
+        <div class="split-center-line"></div>
+        <div class="split-vs">vs</div>
+        <div class="split-center-line"></div>
+        <div class="split-center-dot"></div>
+      </div>
+      ${rightArt ? articleHTML(rightArt, true) : '<div></div>'}
+    `;
+
+    // Click handlers
+    if (leftArt) pair.querySelector('.split-article-left')?.addEventListener('click', () => window.open(leftArt.url, '_blank'));
+    if (rightArt) pair.querySelector('.split-article-right')?.addEventListener('click', () => window.open(rightArt.url, '_blank'));
+
+    feed.appendChild(pair);
+  }
+
+  // If we have very few pairs show a note
+  if (left.length === 0 || right.length === 0) {
+    const note = document.createElement('div');
+    note.style.cssText = 'text-align:center;padding:20px;font-size:12px;color:var(--muted);';
+    note.textContent = left.length === 0
+      ? '← No left-leaning sources found for this topic right now'
+      : 'No right-leaning sources found for this topic right now →';
+    feed.appendChild(note);
+  }
+}
+
+function articleHTML(article, isRight=false) {
+  const src = guessBias(article.source);
+  const cls = isRight ? 'split-article split-article-right' : 'split-article split-article-left';
+  return `
+    <div class="${cls}" style="cursor:pointer" onclick="window.open('${article.url}','_blank')">
+      ${article.image
+        ? `<img class="split-img" src="${article.image}" alt="" loading="lazy" onerror="this.outerHTML='<div class=split-img-placeholder>V</div>'">`
+        : `<div class="split-img-placeholder">V</div>`}
+      <div class="split-source-row">
+        <div class="bias-pip ${src.pip}"></div>
+        <span class="split-source-name">${article.source}</span>
+      </div>
+      <div class="split-headline">${article.title}</div>
+      ${article.description ? `<div class="split-desc">${article.description.slice(0,120)}${article.description.length>120?'…':''}</div>` : ''}
+      <div class="split-time">${timeAgo(article.publishedAt)}</div>
+    </div>
+  `;
+}
+
+// Issue tab clicks
+document.querySelectorAll('.issue-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.issue-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeIssue = btn.dataset.issue;
+    renderIssueHero(activeIssue);
+    fetchIssueNews(activeIssue);
+  });
+});
+
+// Dark mode
+const toggle = document.getElementById('theme-toggle');
+let dark = localStorage.getItem('votum-theme') === 'dark';
+if (dark) { document.documentElement.setAttribute('data-theme','dark'); toggle.textContent='☾'; }
+toggle.addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+  toggle.textContent = dark?'☾':'☀';
+  localStorage.setItem('votum-theme', dark?'dark':'light');
+});
+
+// Boot
+renderIssueHero('war');
+fetchIssueNews('war');
+</script>
+</body>
+</html>
