@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Votum Crew Test</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Noto+Serif:wght@100&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#0C0C0A; color:#EDEAE2; font-family:Inter,sans-serif; padding:48px; min-height:100vh; }
+h1 { font-family:'EB Garamond',serif; font-size:32px; margin-bottom:6px; }
+.sub { font-size:13px; color:#7A7A72; margin-bottom:40px; }
+.crew { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:32px; }
+.model-card {
+  background:#141412; border:0.5px solid rgba(255,255,255,0.08);
+  border-radius:10px; padding:20px; text-align:center;
+  display:flex; flex-direction:column; gap:8px; align-items:center;
+}
+.model-icon { font-size:28px; }
+.model-name { font-size:14px; font-weight:500; }
+.model-status {
+  font-size:10px; letter-spacing:0.08em; text-transform:uppercase;
+  padding:3px 10px; border-radius:20px; margin-top:4px;
+}
+.status-waiting { background:rgba(255,255,255,0.06); color:#7A7A72; }
+.status-ok { background:rgba(58,122,74,0.2); color:#5A9A6A; border:0.5px solid rgba(58,122,74,0.3); }
+.status-fail { background:rgba(138,58,58,0.2); color:#B87A7A; border:0.5px solid rgba(138,58,58,0.3); }
+.status-loading { background:rgba(90,58,138,0.2); color:#9A7AB8; border:0.5px solid rgba(90,58,138,0.3); animation:pulse 1s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.model-score { font-family:'EB Garamond',serif; font-size:32px; color:#EDEAE2; }
+.model-reasoning { font-size:11px; color:#7A7A72; line-height:1.5; font-style:italic; margin-top:4px; }
+
+.test-btn {
+  background:#EDEAE2; color:#0C0C0A;
+  border:none; border-radius:7px; padding:12px 32px;
+  font-size:12px; font-family:Inter,sans-serif;
+  letter-spacing:0.08em; text-transform:uppercase;
+  cursor:pointer; transition:opacity 0.15s; margin-bottom:32px;
+}
+.test-btn:hover { opacity:0.85; }
+.test-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+.result-section { display:none; }
+.result-section.visible { display:block; }
+
+.spread-card {
+  background:#141412; border:0.5px solid rgba(255,255,255,0.08);
+  border-radius:10px; padding:24px; margin-top:20px;
+}
+.spread-label { font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:#7A7A72; margin-bottom:8px; }
+.spread-signal { font-family:'EB Garamond',serif; font-size:22px; margin-bottom:6px; }
+.spread-desc { font-size:13px; color:#7A7A72; line-height:1.6; }
+
+.test-article {
+  background:#141412; border:0.5px solid rgba(255,255,255,0.08);
+  border-radius:10px; padding:20px; margin-bottom:24px;
+}
+.test-article-label { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:#7A7A72; margin-bottom:8px; }
+.test-article-title { font-family:'EB Garamond',serif; font-size:18px; line-height:1.4; }
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px;">
+  <span style="font-family:'Noto Serif',serif;font-weight:100;font-size:28px;opacity:0.7;">λ</span>
+  <h1>Votum Crew Test</h1>
+</div>
+<div class="sub">Fire a test article at all five models — see who's online and what they think</div>
+
+<div class="test-article">
+  <div class="test-article-label">Test article</div>
+  <div class="test-article-title" id="test-title">The US economy added 250,000 jobs last month, beating expectations — but wage growth slowed</div>
+  <div style="font-size:11px;color:#7A7A72;margin-top:8px;">Source: Reuters · Test query</div>
+</div>
+
+<button class="test-btn" id="test-btn" onclick="runTest()">
+  Fire at all five minds →
+</button>
+
+<!-- CREW STATUS -->
+<div class="crew" id="crew">
+  <div class="model-card" id="card-Claude">
+    <div class="model-icon" style="color:#3A5A8A;">◈</div>
+    <div class="model-name">Claude</div>
+    <div class="model-status status-waiting" id="status-Claude">Standing by</div>
+  </div>
+  <div class="model-card" id="card-Grok">
+    <div class="model-icon" style="color:#5A3A8A;">⚡</div>
+    <div class="model-name">Grok</div>
+    <div class="model-status status-waiting" id="status-Grok">Standing by</div>
+  </div>
+  <div class="model-card" id="card-ChatGPT">
+    <div class="model-icon" style="color:#3A7A4A;">◯</div>
+    <div class="model-name">ChatGPT</div>
+    <div class="model-status status-waiting" id="status-ChatGPT">Standing by</div>
+  </div>
+  <div class="model-card" id="card-Gemini">
+    <div class="model-icon" style="color:#7A5A2A;">✦</div>
+    <div class="model-name">Gemini</div>
+    <div class="model-status status-waiting" id="status-Gemini">Standing by</div>
+  </div>
+  <div class="model-card" id="card-DeepSeek">
+    <div class="model-icon" style="color:#8A4A3A;">⊕</div>
+    <div class="model-name">DeepSeek</div>
+    <div class="model-status status-waiting" id="status-DeepSeek">Standing by</div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="result-section" id="results">
+  <div class="crew" id="scores-grid"></div>
+  <div class="spread-card" id="spread-card"></div>
+</div>
+
+<script>
+const MODEL_COLORS = {
+  'Claude':'#3A5A8A', 'Grok':'#5A3A8A',
+  'ChatGPT':'#3A7A4A', 'Gemini':'#7A5A2A', 'DeepSeek':'#8A4A3A'
+};
+
+function scoreColor(s) {
+  if (s >= 75) return '#5A9A6A';
+  if (s >= 55) return '#8A9A6A';
+  if (s >= 40) return '#9A7A4A';
+  return '#9A5A5A';
+}
+
+function setStatus(model, status, text) {
+  const el = document.getElementById(`status-${model}`);
+  if (!el) return;
+  el.className = `model-status status-${status}`;
+  el.textContent = text;
+}
+
+async function runTest() {
+  const btn = document.getElementById('test-btn');
+  btn.disabled = true;
+  btn.textContent = 'Firing...';
+
+  // Set all to loading
+  ['Claude','Grok','ChatGPT','Gemini','DeepSeek'].forEach(m => {
+    setStatus(m, 'loading', 'Reading...');
+  });
+
+  document.getElementById('results').classList.remove('visible');
+
+  try {
+    const res = await fetch('/.netlify/functions/analyze-multi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: document.getElementById('test-title').textContent,
+        source: 'Reuters',
+        description: 'The US economy added 250,000 jobs last month, beating analyst expectations of 185,000. However wage growth slowed to 0.2% month-over-month, raising questions about consumer spending power.',
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.models?.length) throw new Error('No models returned');
+
+    // Update status for each model that responded
+    const respondedModels = data.models.map(m => m.model);
+    ['Claude','Grok','ChatGPT','Gemini','DeepSeek'].forEach(m => {
+      if (respondedModels.includes(m)) {
+        setStatus(m, 'ok', 'Online ✓');
+      } else {
+        setStatus(m, 'fail', 'No response');
+      }
+    });
+
+    // Render scores
+    const scoresGrid = document.getElementById('scores-grid');
+    scoresGrid.innerHTML = '';
+    data.models.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'model-card';
+      card.innerHTML = `
+        <div class="model-icon" style="color:${MODEL_COLORS[m.model]||'#888'}">${
+          {'Claude':'◈','Grok':'⚡','ChatGPT':'◯','Gemini':'✦','DeepSeek':'⊕'}[m.model]||'·'
+        }</div>
+        <div class="model-name">${m.model}</div>
+        <div class="model-score" style="color:${scoreColor(m.overall)}">${m.overall}</div>
+        <div style="font-size:10px;color:${MODEL_COLORS[m.model]||'#888'};letter-spacing:0.04em;">${m.perspective||m.lean||''}</div>
+        <div class="model-reasoning">${m.reasoning||''}</div>
+      `;
+      scoresGrid.appendChild(card);
+    });
+
+    // Spread signal
+    const spreadCard = document.getElementById('spread-card');
+    spreadCard.innerHTML = `
+      <div class="spread-label">Spread signal</div>
+      <div class="spread-signal" style="color:${data.spread?.color||'#EDEAE2'}">${data.spread?.label||''}</div>
+      <div class="spread-desc">${data.spread?.desc||''}</div>
+      <div style="margin-top:12px;font-size:11px;color:#7A7A72;">
+        ${data.models_count} of 5 models responded · 
+        Perspective consensus: ${data.perspective_consensus||data.lean_consensus||'—'}
+      </div>
+    `;
+
+    document.getElementById('results').classList.add('visible');
+    btn.textContent = 'Run again →';
+    btn.disabled = false;
+
+  } catch(err) {
+    ['Claude','Grok','ChatGPT','Gemini','DeepSeek'].forEach(m => {
+      setStatus(m, 'fail', 'Error');
+    });
+    btn.textContent = 'Try again →';
+    btn.disabled = false;
+    console.error(err);
+  }
+}
+</script>
+</body>
+</html>
