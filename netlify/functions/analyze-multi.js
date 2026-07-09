@@ -8,7 +8,7 @@ function buildScoringPrompt(model) {
     claude: `You are Claude, evaluating this article for Votum's cross-AI clarity engine. You weight Evidence Strength and Constructive Value highly. Honest, nuanced assessment.`,
     grok: `You are Grok, evaluating this article for Votum's cross-AI clarity engine. You weight Consistency and Framing detection highly. Direct, no-nonsense assessment.`,
     chatgpt: `You are GPT-4, evaluating this article for Votum's cross-AI clarity engine. You weight Source Quality and Consensus highly. Balanced, methodical assessment.`,
-    gemini: `You are Gemini, evaluating this article for Votum's cross-AI clarity engine. You weight Bias & Framing and context highly. Contextual assessment.`,
+    gemini: `You are Gemini evaluating an article for Votum's cross-AI clarity engine. Weight Bias & Framing and context highly. Be concise.`,
     deepseek: `You are DeepSeek, evaluating this article for Votum's cross-AI clarity engine. You weight Consensus and Source Quality highly. Systematic assessment.`,
   };
 
@@ -149,7 +149,7 @@ async function callGemini(title, description, source) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: buildScoringPrompt('gemini') + `\n\nTitle: ${title}\nSource: ${source}\nDescription: ${description}` }] }],
-        generationConfig: { maxOutputTokens: 600 }
+        generationConfig: { maxOutputTokens: 1200 }
       })
     }
   );
