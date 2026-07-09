@@ -50,7 +50,7 @@ h1 { font-family:'EB Garamond',serif; font-size:32px; margin-bottom:6px; }
 .spread-signal { font-family:'EB Garamond',serif; font-size:22px; margin-bottom:6px; }
 .spread-desc { font-size:13px; color:#7A7A72; line-height:1.6; }
 
-.test-article {
+.suggestion-pill:hover { color:#EDEAE2 !important; border-color:rgba(255,255,255,0.15) !important; }
   background:#141412; border:0.5px solid rgba(255,255,255,0.08);
   border-radius:10px; padding:20px; margin-bottom:24px;
 }
@@ -67,9 +67,30 @@ h1 { font-family:'EB Garamond',serif; font-size:32px; margin-bottom:6px; }
 <div class="sub">Fire a test article at all five models — see who's online and what they think</div>
 
 <div class="test-article">
-  <div class="test-article-label">Test article</div>
-  <div class="test-article-title" id="test-title">The US economy added 250,000 jobs last month, beating expectations — but wage growth slowed</div>
-  <div style="font-size:11px;color:#7A7A72;margin-top:8px;">Source: Reuters · Test query</div>
+  <div class="test-article-label">Test article — edit to try any headline</div>
+  <div class="test-article-title" id="test-title" contenteditable="true" style="outline:none;cursor:text;border-bottom:0.5px solid rgba(255,255,255,0.1);padding-bottom:8px;" spellcheck="false">The US economy added 250,000 jobs last month, beating expectations — but wage growth slowed</div>
+  <input id="test-source" value="Reuters" style="background:none;border:none;border-bottom:0.5px solid rgba(255,255,255,0.06);color:#7A7A72;font-size:11px;font-family:Inter,sans-serif;margin-top:8px;outline:none;width:200px;" placeholder="Source name">
+</div>
+
+<div style="margin-bottom:24px;">
+  <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:#4A4A46;margin-bottom:10px;">Try these — paste into the headline above:</div>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div class="suggestion-pill" onclick="setHeadline(this)" style="font-size:11px;color:#7A7A72;padding:6px 12px;border:0.5px solid rgba(255,255,255,0.06);border-radius:6px;cursor:pointer;transition:all 0.15s;line-height:1.4;">
+      "Biden's disastrous border policy has destroyed America" — Breitbart
+    </div>
+    <div class="suggestion-pill" onclick="setHeadline(this)" style="font-size:11px;color:#7A7A72;padding:6px 12px;border:0.5px solid rgba(255,255,255,0.06);border-radius:6px;cursor:pointer;transition:all 0.15s;line-height:1.4;">
+      "Republicans block life-saving healthcare for millions of Americans"
+    </div>
+    <div class="suggestion-pill" onclick="setHeadline(this)" style="font-size:11px;color:#7A7A72;padding:6px 12px;border:0.5px solid rgba(255,255,255,0.06);border-radius:6px;cursor:pointer;transition:all 0.15s;line-height:1.4;">
+      "Climate change: the greatest hoax ever perpetrated on mankind"
+    </div>
+    <div class="suggestion-pill" onclick="setHeadline(this)" style="font-size:11px;color:#7A7A72;padding:6px 12px;border:0.5px solid rgba(255,255,255,0.06);border-radius:6px;cursor:pointer;transition:all 0.15s;line-height:1.4;">
+      "Israel commits genocide in Gaza as world looks away" — The Intercept
+    </div>
+    <div class="suggestion-pill" onclick="setHeadline(this)" style="font-size:11px;color:#7A7A72;padding:6px 12px;border:0.5px solid rgba(255,255,255,0.06);border-radius:6px;cursor:pointer;transition:all 0.15s;line-height:1.4;">
+      "Trump's economic miracle is being destroyed by radical left policies"
+    </div>
+  </div>
 </div>
 
 <button class="test-btn" id="test-btn" onclick="runTest()">
@@ -131,7 +152,19 @@ function setStatus(model, status, text) {
   el.textContent = text;
 }
 
-async function runTest() {
+async function setHeadline(el) {
+  const text = el.textContent.trim();
+  // Extract source if in quotes with dash
+  const sourceMatch = text.match(/— (.+)$/);
+  if (sourceMatch) {
+    document.getElementById('test-source').value = sourceMatch[1];
+    document.getElementById('test-title').textContent = text.replace(/\s*—\s*.+$/, '').replace(/^"|"$/g, '').trim();
+  } else {
+    document.getElementById('test-title').textContent = text.replace(/^"|"$/g, '').trim();
+  }
+}
+
+function runTest() {
   const btn = document.getElementById('test-btn');
   btn.disabled = true;
   btn.textContent = 'Firing...';
@@ -148,9 +181,9 @@ async function runTest() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        title: document.getElementById('test-title').textContent,
-        source: 'Reuters',
-        description: 'The US economy added 250,000 jobs last month, beating analyst expectations of 185,000. However wage growth slowed to 0.2% month-over-month, raising questions about consumer spending power.',
+        title: document.getElementById('test-title').textContent.trim(),
+        source: document.getElementById('test-source').value || 'Unknown',
+        description: '',
       })
     });
 
