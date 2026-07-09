@@ -134,6 +134,8 @@ async function callGrok(title, description, source) {
     })
   });
   const data = await res.json();
+  console.log('Grok raw response:', JSON.stringify(data).slice(0, 300));
+  if (!data.choices?.[0]?.message?.content) throw new Error(`Grok bad response: ${JSON.stringify(data).slice(0,200)}`);
   const parsed = parseJSON(data.choices[0].message.content);
   parsed.overall = calcOverall(parsed.scores);
   return { model: 'Grok', ...parsed };
@@ -152,6 +154,8 @@ async function callGemini(title, description, source) {
     }
   );
   const data = await res.json();
+  console.log('Gemini raw response:', JSON.stringify(data).slice(0, 300));
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error(`Gemini bad response: ${JSON.stringify(data).slice(0,200)}`);
   const parsed = parseJSON(data.candidates[0].content.parts[0].text);
   parsed.overall = calcOverall(parsed.scores);
   return { model: 'Gemini', ...parsed };
