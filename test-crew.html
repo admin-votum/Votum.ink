@@ -154,17 +154,18 @@ function setStatus(model, status, text) {
 
 async function setHeadline(el) {
   const text = el.textContent.trim();
-  // Extract source if in quotes with dash
-  const sourceMatch = text.match(/— (.+)$/);
+  const sourceMatch = text.match(/—\s*(.+)$/);
   if (sourceMatch) {
-    document.getElementById('test-source').value = sourceMatch[1];
+    document.getElementById('test-source').value = sourceMatch[1].trim();
     document.getElementById('test-title').textContent = text.replace(/\s*—\s*.+$/, '').replace(/^"|"$/g, '').trim();
   } else {
     document.getElementById('test-title').textContent = text.replace(/^"|"$/g, '').trim();
   }
+  // Auto fire
+  runTest();
 }
 
-function runTest() {
+async function runTest() {
   const btn = document.getElementById('test-btn');
   btn.disabled = true;
   btn.textContent = 'Firing...';
