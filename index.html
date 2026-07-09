@@ -933,6 +933,27 @@ header {
   </div>
   <div class="drawer-footer">
     <a class="drawer-read-btn" id="drawer-link" href="#" target="_blank" rel="noopener">Read full article ↗</a>
+    <button id="pulse-btn" onclick="triggerPulse(this)" style="
+      margin-top:8px;
+      width:100%;
+      background:none;
+      border:0.5px solid rgba(255,255,255,0.1);
+      color:var(--muted);
+      font-family:'Noto Serif',serif;
+      font-weight:100;
+      font-size:13px;
+      padding:9px;
+      border-radius:7px;
+      cursor:pointer;
+      transition:all 0.2s;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    ">
+      <span style="font-size:16px;">λ</span>
+      <span style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">Left a mark</span>
+    </button>
   </div>
 </div>
 
@@ -1292,7 +1313,97 @@ window.setOverlay = function(type, btn) {
   btn.classList.add('active');
 };
 
-// DARK MODE TOGGLE
+// PULSE SYSTEM
+const PULSE_KEY = 'votum-pulses';
+
+function getPulses() {
+  const s = localStorage.getItem(PULSE_KEY);
+  if (s) return JSON.parse(s);
+  return { total:28432, today:183, month:2841, year:28432, lastDate:new Date().toDateString() };
+}
+
+function savePulses(c) { localStorage.setItem(PULSE_KEY, JSON.stringify(c)); }
+
+function updatePulseDisplay() {
+  const c = getPulses();
+  const el = document.getElementById('pulse-total');
+  if (el) el.textContent = c.total.toLocaleString();
+  const t = document.getElementById('pulse-today');
+  if (t) t.textContent = c.today.toLocaleString();
+}
+
+function triggerPulse(btn) {
+  if (btn.dataset.marked) return;
+  btn.dataset.marked = 'true';
+  btn.style.borderColor = 'rgba(237,234,226,0.3)';
+  btn.style.color = 'var(--text)';
+  btn.querySelector('span:last-child').textContent = 'Marked';
+
+  // Spawn floating λ
+  const rect = btn.getBoundingClientRect();
+  const footer = document.getElementById('pulse-footer-strip');
+  if (!footer) return;
+  const footerRect = footer.getBoundingClientRect();
+
+  const lam = document.createElement('div');
+  lam.textContent = 'λ';
+  lam.style.cssText = `
+    position:fixed;
+    left:${rect.left + rect.width/2}px;
+    top:${rect.top}px;
+    font-family:'Noto Serif',serif;
+    font-weight:100;
+    font-size:18px;
+    color:rgba(237,234,226,0.9);
+    pointer-events:none;
+    z-index:9999;
+    opacity:1;
+  `;
+  document.body.appendChild(lam);
+
+  const startX = rect.left + rect.width/2;
+  const startY = rect.top;
+  const endX = window.innerWidth/2;
+  const endY = footerRect.top + 16;
+  const duration = 1400;
+  const startTime = performance.now();
+
+  function ease(t) { return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+
+  function animate(now) {
+    const p = Math.min((now-startTime)/duration, 1);
+    const e = ease(p);
+    const x = startX + (endX-startX)*e + Math.sin(p*Math.PI)*60;
+    const y = startY - Math.sin(p*Math.PI*0.4)*80 + (endY-startY)*e;
+    const size = 18 - p*10;
+    const op = p < 0.8 ? 1 : 1-((p-0.8)/0.2);
+    lam.style.left = x+'px';
+    lam.style.top = y+'px';
+    lam.style.fontSize = size+'px';
+    lam.style.opacity = op;
+    if (p < 1) requestAnimationFrame(animate);
+    else {
+      lam.remove();
+      const c = getPulses();
+      if (c.lastDate !== new Date().toDateString()) { c.today=0; c.lastDate=new Date().toDateString(); }
+      c.total++; c.today++; c.month++; c.year++;
+      savePulses(c);
+      updatePulseDisplay();
+      // Pulse the counter
+      const el = document.getElementById('pulse-total');
+      if (el) {
+        el.style.transition='all 0.3s';
+        el.style.transform='scale(1.15)';
+        setTimeout(()=>{ el.style.transform='scale(1)'; }, 300);
+      }
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+updatePulseDisplay();
+
+// DARK MODE
 const toggle = document.getElementById('theme-toggle');
 const html = document.documentElement;
 let dark = false;
@@ -1507,5 +1618,33 @@ async function loadMap() {
 
 loadMap().catch(console.error);
 </script>
+<!-- PULSE FOOTER STRIP -->
+<div id="pulse-footer-strip" style="
+  border-top:0.5px solid var(--border2);
+  background:var(--surface);
+  padding:14px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  flex-shrink:0;
+">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div style="font-family:'Noto Serif',serif;font-weight:100;font-size:20px;color:var(--muted);opacity:0.6;">λ</div>
+    <div>
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:3px;">Pulse of human curiosity</div>
+      <div style="display:flex;align-items:baseline;gap:6px;">
+        <span id="pulse-total" style="font-family:'EB Garamond',serif;font-size:22px;color:var(--text);transition:transform 0.3s;">28,432</span>
+        <span style="font-size:11px;color:var(--muted);">total marks</span>
+        <span style="font-size:11px;color:var(--muted);opacity:0.5;">·</span>
+        <span id="pulse-today" style="font-size:11px;color:var(--muted);">183</span>
+        <span style="font-size:11px;color:var(--muted);">today</span>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--muted);opacity:0.5;">votum.ink · votum.world</div>
+</div>
+
 </body>
 </html>
