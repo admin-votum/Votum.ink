@@ -76,10 +76,33 @@ function getPerspectiveConsensus(results) {
 
 function parseJSON(text) {
   const clean = text.replace(/```json|```/g, '').trim();
-  // Find JSON object
-  const match = clean.match(/\{[\s\S]*\}/);
-  if (match) return JSON.parse(match[0]);
-  return JSON.parse(clean);
+  // Try direct parse first
+  try {
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    return JSON.parse(clean);
+  } catch(e) {
+    // Try to recover incomplete JSON by closing open braces
+    try {
+      let partial = clean;
+      const match = partial.match(/\{[\s\S]*/);
+      if (match) {
+        partial = match[0];
+        // Count unclosed braces and close them
+        let open = 0;
+        for (const c of partial) {
+          if (c === '{') open++;
+          if (c === '}') open--;
+        }
+        // Remove trailing comma if present
+        partial = partial.replace(/,\s*$/, '');
+        // Close any open braces
+        partial += '}'.repeat(Math.max(0, open));
+        return JSON.parse(partial);
+      }
+    } catch(e2) {}
+    throw new Error(`JSON parse failed: ${text.slice(0, 100)}`);
+  }
 }
 
 async function callClaude(title, description, source) {
@@ -149,7 +172,7 @@ async function callGemini(title, description, source) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: buildScoringPrompt('gemini') + `\n\nTitle: ${title}\nSource: ${source}\nDescription: ${description}` }] }],
-        generationConfig: { maxOutputTokens: 1200 }
+        generationConfig: { maxOutputTokens: 2000, temperature: 0.1 }
       })
     }
   );
