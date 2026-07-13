@@ -57,8 +57,9 @@ async function fetchHeadlines() {
 
 async function analyzeHeadline(article) {
   const PROMPT = `You are evaluating a news headline and source for bias, framing and credibility.
+Score each dimension from 0 to 100 (not 0-10, use the full 0-100 range).
 Return ONLY valid JSON with no other text:
-{"scores":{"consensus":0,"source_quality":0,"evidence_strength":0,"bias_framing":0,"consistency":0,"constructive_value":0},"overall":0,"lean":"center","reasoning":"one sentence max"}`;
+{"scores":{"consensus":75,"source_quality":80,"evidence_strength":60,"bias_framing":70,"consistency":75,"constructive_value":65},"overall":71,"lean":"center","reasoning":"one sentence max"}`;
 
   const content = `Headline: ${article.title}\nSource: ${article.source}`;
 
