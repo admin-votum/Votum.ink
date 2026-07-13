@@ -4,14 +4,10 @@
 
 const TOP_SOURCES = [
   { url: 'https://feeds.reuters.com/reuters/topNews', source: 'Reuters' },
-  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source: 'NYT' },
   { url: 'http://feeds.bbci.co.uk/news/rss.xml', source: 'BBC News' },
   { url: 'https://feeds.foxnews.com/foxnews/politics', source: 'Fox News' },
-  { url: 'https://rss.politico.com/politics-news.xml', source: 'Politico' },
-  { url: 'https://feeds.feedburner.com/breitbart', source: 'Breitbart' },
   { url: 'https://theintercept.com/feed/?rss', source: 'The Intercept' },
-  { url: 'https://feeds.skynews.com/feeds/rss/world.xml', source: 'Sky News' },
-  { url: 'https://feeds.washingtonpost.com/rss/world', source: 'Washington Post' },
+  { url: 'https://www.theguardian.com/world/rss', source: 'The Guardian' },
 ];
 
 // Guardian API — returns full article text
@@ -100,7 +96,7 @@ async function fetchArticleContent(url) {
 }
 
 async function analyzeArticle(article) {
-  const articleContent = article.fullContent || await fetchArticleContent(article.url);
+  const articleContent = ''; // Skip article fetching for speed - headline analysis only
   const content = `Headline: ${article.title}\nSource: ${article.source}\nContent: ${articleContent || 'Not available'}`;
 
   const PROMPT = `Evaluate this news article on six dimensions (0-100 each).
@@ -185,13 +181,8 @@ exports.handler = async (event) => {
   try {
     console.log('Generating fresh feed...');
     const headlines = await fetchHeadlines();
-    const analyzed = [];
-
-    for (let i = 0; i < headlines.length; i += 4) {
-      const batch = headlines.slice(i, i+4);
-      const results = await Promise.allSettled(batch.map(analyzeArticle));
-      results.forEach(r => { if (r.status==='fulfilled'&&r.value) analyzed.push(r.value); });
-    }
+    const results = await Promise.allSettled(headlines.map(analyzeArticle));
+    const analyzed = results.filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
 
     cachedFeed = { articles:analyzed, generatedAt:new Date().toISOString(), count:analyzed.length };
     cacheTime = Date.now();
