@@ -180,8 +180,9 @@ const CACHE_TTL = 14 * 60 * 1000; // 14 minutes
 exports.handler = async (event) => {
   const headers = { 'Access-Control-Allow-Origin':'*', 'Content-Type':'application/json' };
 
-  // Serve from cache if fresh
-  if (cachedFeed && cacheTime && (Date.now() - cacheTime) < CACHE_TTL) {
+  // Serve from cache if fresh (unless refresh requested)
+  const refresh = event.queryStringParameters?.refresh === 'true';
+  if (!refresh && cachedFeed && cacheTime && (Date.now() - cacheTime) < CACHE_TTL) {
     return { statusCode:200, headers, body:JSON.stringify(cachedFeed) };
   }
 
