@@ -12,8 +12,8 @@ exports.handler = async function(event) {
   try {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const twoWeeksAgo = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const weekAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const twoWeeksAgo = new Date(now - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     // Fetch Trump approval — last 7 days and previous 7 days
     const [approvalRecent, approvalPrev, genericRecent, genericPrev] = await Promise.all([
