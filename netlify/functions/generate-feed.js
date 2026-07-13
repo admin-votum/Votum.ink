@@ -175,7 +175,7 @@ Return ONLY valid JSON:
 // In-memory cache — persists between warm function invocations
 let cachedFeed = null;
 let cacheTime = null;
-const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+const CACHE_TTL = 14 * 60 * 1000; // 14 minutes
 
 exports.handler = async (event) => {
   const headers = { 'Access-Control-Allow-Origin':'*', 'Content-Type':'application/json' };
