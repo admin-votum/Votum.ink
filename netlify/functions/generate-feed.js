@@ -19,7 +19,7 @@ async function fetchGuardianArticles() {
   try {
     const key = process.env.GUARDIAN_KEY;
     const res = await fetch(
-      `https://content.guardianapis.com/search?section=world|politics|us-news|environment&show-fields=bodyText,thumbnail,headline&page-size=5&api-key=${key}`,
+      `https://content.guardianapis.com/search?section=world%7Cpolitics%7Cus-news%7Cenvironment&show-fields=bodyText,thumbnail,headline&page-size=5&order-by=newest&api-key=${key}`,
       { signal: AbortSignal.timeout(8000) }
     );
     if (!res.ok) return [];
