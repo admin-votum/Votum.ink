@@ -1,12 +1,11 @@
 // deFramed — Feed Generator
 // Fetches headlines, analyzes with 5 models, returns JSON
-// Called by get-feed which caches the result in memory
+// Guardian API for full content, RSS for other sources
 
 const TOP_SOURCES = [
   { url: 'https://feeds.reuters.com/reuters/topNews', source: 'Reuters' },
   { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source: 'NYT' },
   { url: 'http://feeds.bbci.co.uk/news/rss.xml', source: 'BBC News' },
-  { url: 'https://www.theguardian.com/world/rss', source: 'The Guardian' },
   { url: 'https://feeds.foxnews.com/foxnews/politics', source: 'Fox News' },
   { url: 'https://rss.politico.com/politics-news.xml', source: 'Politico' },
   { url: 'https://feeds.feedburner.com/breitbart', source: 'Breitbart' },
@@ -14,6 +13,27 @@ const TOP_SOURCES = [
   { url: 'https://feeds.skynews.com/feeds/rss/world.xml', source: 'Sky News' },
   { url: 'https://feeds.washingtonpost.com/rss/world', source: 'Washington Post' },
 ];
+
+// Guardian API — returns full article text
+async function fetchGuardianArticles() {
+  try {
+    const key = process.env.GUARDIAN_KEY;
+    const res = await fetch(
+      `https://content.guardianapis.com/search?section=world|politics|us-news|environment&show-fields=bodyText,thumbnail,headline&page-size=10&api-key=${key}`,
+      { signal: AbortSignal.timeout(8000) }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.response?.results || []).map(a => ({
+      title: a.fields?.headline || a.webTitle,
+      url: a.webUrl,
+      source: 'The Guardian',
+      image: a.fields?.thumbnail || null,
+      pubDate: a.webPublicationDate,
+      fullContent: cleanHtml(a.fields?.bodyText || '').slice(0, 2000),
+    }));
+  } catch(e) { return []; }
+}
 
 function cleanHtml(str = '') {
   return str.replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#039;/g,"'").trim();
@@ -50,6 +70,11 @@ async function fetchHeadlines() {
   }));
 
   const articles = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
+  
+  // Add Guardian articles with full content
+  const guardianArticles = await fetchGuardianArticles();
+  articles.push(...guardianArticles);
+
   const seen = new Set();
   return articles.filter(a => {
     const key = a.title.slice(0, 40).toLowerCase();
@@ -79,7 +104,7 @@ async function fetchArticleContent(url) {
 }
 
 async function analyzeArticle(article) {
-  const articleContent = await fetchArticleContent(article.url);
+  const articleContent = article.fullContent || await fetchArticleContent(article.url);
   const content = `Headline: ${article.title}\nSource: ${article.source}\nContent: ${articleContent || 'Not available'}`;
 
   const PROMPT = `Evaluate this news article on six dimensions (0-100 each).
@@ -114,7 +139,7 @@ Return ONLY valid JSON:
       method:'POST',
       headers:{'Content-Type':'application/json',...c.headers},
       body:JSON.stringify(c.body),
-      signal:AbortSignal.timeout(10000),
+      signal:AbortSignal.timeout(15000),
     });
     const data = await res.json();
     const text = c.parse(data).replace(/```json|```/g,'').trim();
