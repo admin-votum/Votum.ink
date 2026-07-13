@@ -60,7 +60,7 @@ async function fetchHeadlines() {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).slice(0, 20); // Max 20 articles
+  }).slice(0, 6); // Max 6 articles per run
 }
 
 async function fetchArticleContent(url) {
