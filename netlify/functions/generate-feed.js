@@ -9,6 +9,10 @@ const TOP_SOURCES = [
   { url: 'https://theintercept.com/feed/?rss', source: 'The Intercept' },
   { url: 'https://www.theguardian.com/world/rss', source: 'The Guardian' },
   { url: 'https://feeds.skynews.com/feeds/rss/world.xml', source: 'Sky News' },
+  { url: 'https://rss.politico.com/politics-news.xml', source: 'Politico' },
+  { url: 'https://feeds.feedburner.com/breitbart', source: 'Breitbart' },
+  { url: 'https://feeds.washingtonpost.com/rss/world', source: 'Washington Post' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source: 'NYT' },
 ];
 
 function cleanHtml(str = '') {
@@ -41,7 +45,7 @@ async function fetchHeadlines() {
           items.push({ title, url: link, source: feed.source, image, pubDate });
         }
       }
-      return items.slice(0, 2);
+      return items.slice(0, 3);
     } catch(e) { return []; }
   }));
 
@@ -52,7 +56,7 @@ async function fetchHeadlines() {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).slice(0, 10);
+  }).slice(0, 15);
 }
 
 async function analyzeHeadline(article) {
