@@ -19,7 +19,7 @@ async function fetchGuardianArticles() {
   try {
     const key = process.env.GUARDIAN_KEY;
     const res = await fetch(
-      `https://content.guardianapis.com/search?section=world|politics|us-news|environment&show-fields=bodyText,thumbnail,headline&page-size=10&api-key=${key}`,
+      `https://content.guardianapis.com/search?section=world|politics|us-news|environment&show-fields=bodyText,thumbnail,headline&page-size=5&api-key=${key}`,
       { signal: AbortSignal.timeout(8000) }
     );
     if (!res.ok) return [];
@@ -65,7 +65,7 @@ async function fetchHeadlines() {
           items.push({ title, url: link, source: feed.source, image, pubDate });
         }
       }
-      return items.slice(0, 2);
+      return items.slice(0, 1);
     } catch(e) { return []; }
   }));
 
@@ -81,7 +81,7 @@ async function fetchHeadlines() {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).slice(0, 20);
+  }).slice(0, 8); // Keep it manageable for function timeout
 }
 
 async function fetchArticleContent(url) {
