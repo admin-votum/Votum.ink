@@ -70,10 +70,6 @@ async function fetchHeadlines() {
   }));
 
   const articles = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
-  
-  // Add Guardian articles with full content
-  const guardianArticles = await fetchGuardianArticles();
-  articles.push(...guardianArticles);
 
   const seen = new Set();
   return articles.filter(a => {
