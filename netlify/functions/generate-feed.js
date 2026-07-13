@@ -56,73 +56,43 @@ async function fetchHeadlines() {
 }
 
 async function analyzeHeadline(article) {
-  const PROMPT = `You are evaluating a news headline and source for bias, framing and credibility.
-Score each dimension from 0 to 100 (not 0-10, use the full 0-100 range).
-Return ONLY valid JSON with no other text:
-{"scores":{"consensus":75,"source_quality":80,"evidence_strength":60,"bias_framing":70,"consistency":75,"constructive_value":65},"overall":71,"lean":"center","reasoning":"one sentence max"}`;
-
-  const content = `Headline: ${article.title}\nSource: ${article.source}`;
-
-  const calls = [
-    { name:'Claude', url:'https://api.anthropic.com/v1/messages',
-      headers:{'x-api-key':process.env.ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
-      body:{ model:'claude-sonnet-4-6', max_tokens:200, system:PROMPT, messages:[{role:'user',content}] },
-      parse:(d)=>d.content[0].text },
-    { name:'ChatGPT', url:'https://api.openai.com/v1/chat/completions',
-      headers:{'Authorization':`Bearer ${process.env.OPENAI_KEY}`},
-      body:{ model:'gpt-4o-mini', max_tokens:200, messages:[{role:'system',content:PROMPT},{role:'user',content}] },
-      parse:(d)=>d.choices[0].message.content },
-    { name:'Grok', url:'https://api.x.ai/v1/chat/completions',
-      headers:{'Authorization':`Bearer ${process.env.GROK_KEY}`},
-      body:{ model:'grok-3', max_tokens:200, messages:[{role:'system',content:PROMPT},{role:'user',content}] },
-      parse:(d)=>d.choices[0].message.content },
-    { name:'Gemini', url:`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_KEY}`,
-      headers:{},
-      body:{ contents:[{parts:[{text:PROMPT+'\n\n'+content}]}], generationConfig:{maxOutputTokens:200,temperature:0.1} },
-      parse:(d)=>d.candidates[0].content.parts[0].text },
-    { name:'DeepSeek', url:'https://api.deepseek.com/v1/chat/completions',
-      headers:{'Authorization':`Bearer ${process.env.DEEPSEEK_KEY}`},
-      body:{ model:'deepseek-chat', max_tokens:200, messages:[{role:'system',content:PROMPT},{role:'user',content}] },
-      parse:(d)=>d.choices[0].message.content },
-  ];
-
-  const results = (await Promise.allSettled(calls.map(async c => {
-    const res = await fetch(c.url, {
-      method:'POST',
-      headers:{'Content-Type':'application/json',...c.headers},
-      body:JSON.stringify(c.body),
-      signal:AbortSignal.timeout(8000),
+  try {
+    const baseUrl = process.env.URL || 'https://votum.ink';
+    const res = await fetch(`${baseUrl}/.netlify/functions/analyze-multi`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: article.title,
+        source: article.source,
+        description: '',
+      }),
+      signal: AbortSignal.timeout(20000),
     });
     const data = await res.json();
-    const text = c.parse(data).replace(/```json|```/g,'').trim();
-    const match = text.match(/\{[\s\S]*\}/);
-    const parsed = JSON.parse(match ? match[0] : text);
-    return { model:c.name, ...parsed };
-  }))).filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
+    if (!data.models?.length) return null;
 
-  if (!results.length) return null;
+    const overalls = data.models.map(m => m.overall || 50);
+    const spreadVal = Math.max(...overalls) - Math.min(...overalls);
+    const spread = spreadVal < 15 ? { desc: 'Five minds largely agree.', color: '#3A7A4A' }
+      : spreadVal < 30 ? { desc: 'Models find different things worth noting.', color: '#7A7A4A' }
+      : spreadVal < 45 ? { desc: 'Significant disagreement. The debate itself is the signal.', color: '#8A4A3A' }
+      : { desc: 'Not a warning — an invitation. Read as a judge reads a contested case.', color: '#8A3A6A' };
 
-  const overalls = results.map(r=>r.overall||50);
-  const spreadVal = Math.max(...overalls)-Math.min(...overalls);
-  const spread = spreadVal < 15 ? {desc:'Five minds largely agree.',color:'#3A7A4A'}
-    : spreadVal < 30 ? {desc:'Models find different things worth noting.',color:'#7A7A4A'}
-    : spreadVal < 45 ? {desc:'Significant disagreement. The debate itself is the signal.',color:'#8A4A3A'}
-    : {desc:'Not a warning — an invitation. Read as a judge reads a contested case.',color:'#8A3A6A'};
-
-  return {
-    id: article.url,
-    headline: article.title,
-    source: article.source,
-    url: article.url,
-    image: article.image,
-    publishedAt: article.pubDate ? new Date(article.pubDate).toISOString() : new Date().toISOString(),
-    models: results,
-    spreadVal,
-    signal: spread.desc,
-    spreadColor: spread.color,
-    headlineOnly: true, // flag — full analysis available on tap
-    analyzedAt: new Date().toISOString(),
-  };
+    return {
+      id: article.url,
+      headline: article.title,
+      source: article.source,
+      url: article.url,
+      image: article.image,
+      publishedAt: article.pubDate ? new Date(article.pubDate).toISOString() : new Date().toISOString(),
+      models: data.models,
+      spreadVal,
+      signal: spread.desc,
+      spreadColor: spread.color,
+      headlineOnly: true,
+      analyzedAt: new Date().toISOString(),
+    };
+  } catch(e) { return null; }
 }
 
 // In-memory cache
