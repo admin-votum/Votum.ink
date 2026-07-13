@@ -1,8 +1,6 @@
-// deFramed — Feed Generator with Netlify Blobs
-// Scheduled every 15 mins — fetches, analyzes, stores
-// Users get instant pre-analyzed feed
-
-const { getStore } = require('@netlify/blobs');
+// deFramed — Feed Generator
+// Fetches headlines, analyzes with 5 models, returns JSON
+// Called by get-feed which caches the result in memory
 
 const TOP_SOURCES = [
   { url: 'https://feeds.reuters.com/reuters/topNews', source: 'Reuters' },
@@ -149,22 +147,20 @@ Return ONLY valid JSON:
   };
 }
 
-exports.handler = async (event, context) => {
+// In-memory cache — persists between warm function invocations
+let cachedFeed = null;
+let cacheTime = null;
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
+exports.handler = async (event) => {
   const headers = { 'Access-Control-Allow-Origin':'*', 'Content-Type':'application/json' };
 
+  // Serve from cache if fresh
+  if (cachedFeed && cacheTime && (Date.now() - cacheTime) < CACHE_TTL) {
+    return { statusCode:200, headers, body:JSON.stringify(cachedFeed) };
+  }
+
   try {
-    const store = getStore('deframed-feed');
-
-    // Check if we have cached feed less than 15 mins old
-    const cached = await store.get('feed', { type:'json' }).catch(()=>null);
-    if (cached && cached.generatedAt) {
-      const age = (Date.now() - new Date(cached.generatedAt)) / 60000;
-      if (age < 15) {
-        return { statusCode:200, headers, body:JSON.stringify(cached) };
-      }
-    }
-
-    // Generate fresh feed
     console.log('Generating fresh feed...');
     const headlines = await fetchHeadlines();
     const analyzed = [];
@@ -175,15 +171,12 @@ exports.handler = async (event, context) => {
       results.forEach(r => { if (r.status==='fulfilled'&&r.value) analyzed.push(r.value); });
     }
 
-    const feed = { articles:analyzed, generatedAt:new Date().toISOString(), count:analyzed.length };
+    cachedFeed = { articles:analyzed, generatedAt:new Date().toISOString(), count:analyzed.length };
+    cacheTime = Date.now();
 
-    // Store in blob
-    await store.setJSON('feed', feed);
-
-    return { statusCode:200, headers, body:JSON.stringify(feed) };
+    return { statusCode:200, headers, body:JSON.stringify(cachedFeed) };
 
   } catch(err) {
-    console.error('generate-feed error:', err);
     return { statusCode:500, headers, body:JSON.stringify({ error:err.message }) };
   }
 };
