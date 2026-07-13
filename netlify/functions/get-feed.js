@@ -1,10 +1,6 @@
-// deFramed — Instant feed reader
-// Reads pre-analyzed feed from Netlify Blobs
-// Returns instantly — no generation needed
+const { getStore } = require('@netlify/blobs');
 
-import { getStore } from '@netlify/blobs';
-
-export default async (req, context) => {
+exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json',
@@ -13,15 +9,15 @@ export default async (req, context) => {
 
   try {
     const store = getStore('deframed-feed');
-    const feed = await store.get('feed', { type: 'json' });
+    const feed = await store.get('feed', { type: 'json' }).catch(()=>null);
 
     if (!feed) {
-      return new Response(JSON.stringify({ articles: [], empty: true }), { headers });
+      return { statusCode:200, headers, body:JSON.stringify({ articles:[], empty:true }) };
     }
 
-    return new Response(JSON.stringify(feed), { headers });
+    return { statusCode:200, headers, body:JSON.stringify(feed) };
 
   } catch(err) {
-    return new Response(JSON.stringify({ articles: [], error: err.message }), { status: 500, headers });
+    return { statusCode:500, headers, body:JSON.stringify({ articles:[], error:err.message }) };
   }
 };

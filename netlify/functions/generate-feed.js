@@ -2,7 +2,7 @@
 // Scheduled every 15 mins — fetches, analyzes, stores
 // Users get instant pre-analyzed feed
 
-import { getStore } from '@netlify/blobs';
+const { getStore } = require('@netlify/blobs');
 
 const TOP_SOURCES = [
   { url: 'https://feeds.reuters.com/reuters/topNews', source: 'Reuters' },
@@ -149,7 +149,7 @@ Return ONLY valid JSON:
   };
 }
 
-export default async (req, context) => {
+exports.handler = async (event, context) => {
   const headers = { 'Access-Control-Allow-Origin':'*', 'Content-Type':'application/json' };
 
   try {
@@ -160,7 +160,7 @@ export default async (req, context) => {
     if (cached && cached.generatedAt) {
       const age = (Date.now() - new Date(cached.generatedAt)) / 60000;
       if (age < 15) {
-        return new Response(JSON.stringify(cached), { headers });
+        return { statusCode:200, headers, body:JSON.stringify(cached) };
       }
     }
 
@@ -180,12 +180,10 @@ export default async (req, context) => {
     // Store in blob
     await store.setJSON('feed', feed);
 
-    return new Response(JSON.stringify(feed), { headers });
+    return { statusCode:200, headers, body:JSON.stringify(feed) };
 
   } catch(err) {
     console.error('generate-feed error:', err);
-    return new Response(JSON.stringify({ error:err.message }), { status:500, headers });
+    return { statusCode:500, headers, body:JSON.stringify({ error:err.message }) };
   }
 };
-
-export const config = { schedule: '*/15 * * * *' };
