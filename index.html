@@ -1000,30 +1000,10 @@ header {
     <a class="nav-link" href="polls.html" style="text-decoration:none;color:var(--muted)" data-i18n="navPolls">Polls</a>
     <a class="nav-link" href="issues.html" style="text-decoration:none;color:var(--muted)" data-i18n="navIssues">Issues</a>
     <a class="nav-link" href="about.html" style="text-decoration:none;color:var(--muted)" data-i18n="navAbout">About</a>
-    <a class="nav-link" href="worth-attention.html" style="text-decoration:none;color:#8A3A6A;font-weight:500">⚖ Worth Full Attention</a>
     <a class="nav-link" href="signup.html" style="text-decoration:none;color:#8A6A2A;font-weight:500" data-i18n="navPro">Pro →</a>
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">☀</button>
   </div>
 </header>
-
-<!-- WORTH FULL ATTENTION STRIP -->
-<div id="worth-strip" style="
-  background:var(--surface);
-  border-bottom:0.5px solid var(--border2);
-  padding:8px 28px;
-  display:none;
-  align-items:center;
-  gap:16px;
-  overflow-x:auto;
-  scrollbar-width:none;
-  flex-shrink:0;
-">
-  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-    <span style="font-size:9px;color:#8A3A6A;text-transform:uppercase;letter-spacing:0.14em;font-family:Inter,sans-serif;font-weight:500;">⚖ Worth Full Attention</span>
-    <span style="font-size:9px;color:var(--muted);letter-spacing:0.04em;">Models significantly disagree</span>
-  </div>
-  <div id="worth-items" style="display:flex;gap:12px;flex-shrink:0;"></div>
-</div>
 
 <div class="main">
   <div class="map-panel">
@@ -1424,47 +1404,6 @@ function triggerPulse(btn) {
 updatePulseDisplay();
 
 // WORTH FULL ATTENTION — most debated articles strip
-async function loadWorthAttention() {
-  try {
-    const res = await fetch('/.netlify/functions/worth-attention');
-    const data = await res.json();
-    const articles = data.articles || [];
-    if (!articles.length) return;
-
-    const strip = document.getElementById('worth-strip');
-    const items = document.getElementById('worth-items');
-    strip.style.display = 'flex';
-
-    articles.forEach(a => {
-      const item = document.createElement('a');
-      item.href = a.url;
-      item.target = '_blank';
-      item.rel = 'noopener';
-      item.style.cssText = `
-        display:flex; flex-direction:column; gap:3px;
-        padding:6px 12px;
-        background:var(--surface2);
-        border:0.5px solid var(--border2);
-        border-radius:6px;
-        text-decoration:none;
-        min-width:220px; max-width:280px;
-        flex-shrink:0;
-        transition:border-color 0.15s;
-        border-left:2px solid #8A3A6A;
-      `;
-      item.innerHTML = `
-        <div style="font-size:10px;color:#8A3A6A;letter-spacing:0.06em;font-family:Inter,sans-serif;">
-          Spread ${a.spread}pts · ${a.dimension_most_debated} most debated
-        </div>
-        <div style="font-size:12px;color:var(--text);line-height:1.3;font-family:'EB Garamond',serif;">${a.title}</div>
-        <div style="font-size:10px;color:var(--muted);">${a.source}</div>
-      `;
-      item.addEventListener('mouseover', () => item.style.borderColor = '#8A3A6A');
-      item.addEventListener('mouseout', () => item.style.borderLeftColor = '#8A3A6A');
-      items.appendChild(item);
-    });
-  } catch(e) { /* silent */ }
-}
 
 // MODEL METHODOLOGY — shown once in drawer
 const MODEL_METHODOLOGY = {
@@ -1851,7 +1790,6 @@ async function loadMap() {
 }
 
 loadMap().catch(console.error);
-loadWorthAttention();
 </script>
 <!-- PULSE FOOTER STRIP -->
 <div id="pulse-footer-strip" style="
