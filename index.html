@@ -892,9 +892,9 @@ header {
             <div class="spread-seg spread-r" id="spread-r"></div>
           </div>
           <div class="spread-labels">
-            <span id="spread-l-label">Left</span>
+            <span id="spread-l-label">Left perspective</span>
             <span id="spread-c-label">Center</span>
-            <span id="spread-r-label">Right</span>
+            <span id="spread-r-label">Right perspective</span>
           </div>
         </div>
       </div>
@@ -1000,10 +1000,30 @@ header {
     <a class="nav-link" href="polls.html" style="text-decoration:none;color:var(--muted)" data-i18n="navPolls">Polls</a>
     <a class="nav-link" href="issues.html" style="text-decoration:none;color:var(--muted)" data-i18n="navIssues">Issues</a>
     <a class="nav-link" href="about.html" style="text-decoration:none;color:var(--muted)" data-i18n="navAbout">About</a>
+    <a class="nav-link" href="worth-attention.html" style="text-decoration:none;color:#8A3A6A;font-weight:500">⚖ Worth Full Attention</a>
     <a class="nav-link" href="signup.html" style="text-decoration:none;color:#8A6A2A;font-weight:500" data-i18n="navPro">Pro →</a>
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">☀</button>
   </div>
 </header>
+
+<!-- WORTH FULL ATTENTION STRIP -->
+<div id="worth-strip" style="
+  background:var(--surface);
+  border-bottom:0.5px solid var(--border2);
+  padding:8px 28px;
+  display:none;
+  align-items:center;
+  gap:16px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  flex-shrink:0;
+">
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <span style="font-size:9px;color:#8A3A6A;text-transform:uppercase;letter-spacing:0.14em;font-family:Inter,sans-serif;font-weight:500;">⚖ Worth Full Attention</span>
+    <span style="font-size:9px;color:var(--muted);letter-spacing:0.04em;">Models significantly disagree</span>
+  </div>
+  <div id="worth-items" style="display:flex;gap:12px;flex-shrink:0;"></div>
+</div>
 
 <div class="main">
   <div class="map-panel">
@@ -1030,9 +1050,9 @@ header {
       <div class="filter-row">
         <span class="filter-label">Source</span>
         <button class="filter-btn active" data-bias="all">All</button>
-        <button class="filter-btn" data-bias="left">Left</button>
+        <button class="filter-btn" data-bias="left">Left perspective</button>
         <button class="filter-btn" data-bias="center">Center</button>
-        <button class="filter-btn" data-bias="right">Right</button>
+        <button class="filter-btn" data-bias="right">Right perspective</button>
       </div>
     </div>
     <div class="news-feed" id="news-feed">
@@ -1403,6 +1423,83 @@ function triggerPulse(btn) {
 
 updatePulseDisplay();
 
+// WORTH FULL ATTENTION — most debated articles strip
+async function loadWorthAttention() {
+  try {
+    const res = await fetch('/.netlify/functions/worth-attention');
+    const data = await res.json();
+    const articles = data.articles || [];
+    if (!articles.length) return;
+
+    const strip = document.getElementById('worth-strip');
+    const items = document.getElementById('worth-items');
+    strip.style.display = 'flex';
+
+    articles.forEach(a => {
+      const item = document.createElement('a');
+      item.href = a.url;
+      item.target = '_blank';
+      item.rel = 'noopener';
+      item.style.cssText = `
+        display:flex; flex-direction:column; gap:3px;
+        padding:6px 12px;
+        background:var(--surface2);
+        border:0.5px solid var(--border2);
+        border-radius:6px;
+        text-decoration:none;
+        min-width:220px; max-width:280px;
+        flex-shrink:0;
+        transition:border-color 0.15s;
+        border-left:2px solid #8A3A6A;
+      `;
+      item.innerHTML = `
+        <div style="font-size:10px;color:#8A3A6A;letter-spacing:0.06em;font-family:Inter,sans-serif;">
+          Spread ${a.spread}pts · ${a.dimension_most_debated} most debated
+        </div>
+        <div style="font-size:12px;color:var(--text);line-height:1.3;font-family:'EB Garamond',serif;">${a.title}</div>
+        <div style="font-size:10px;color:var(--muted);">${a.source}</div>
+      `;
+      item.addEventListener('mouseover', () => item.style.borderColor = '#8A3A6A');
+      item.addEventListener('mouseout', () => item.style.borderLeftColor = '#8A3A6A');
+      items.appendChild(item);
+    });
+  } catch(e) { /* silent */ }
+}
+
+// MODEL METHODOLOGY — shown once in drawer
+const MODEL_METHODOLOGY = {
+  'Claude': {
+    icon: '◈',
+    color: '#3A5A8A',
+    weights: 'Evidence Strength · Constructive Value',
+    approach: 'Are claims sourced? Does this add genuine understanding or generate heat?',
+  },
+  'Grok': {
+    icon: '⚡',
+    color: '#5A3A8A',
+    weights: 'Consistency · Bias & Framing',
+    approach: 'Does the headline match the content? Is the language plain or loaded?',
+  },
+  'ChatGPT': {
+    icon: '◯',
+    color: '#3A7A4A',
+    weights: 'Source Quality · Consensus',
+    approach: 'How established is this outlet? How consistently is this covered?',
+  },
+  'Gemini': {
+    icon: '✦',
+    color: '#7A5A2A',
+    weights: 'Bias & Framing · Context',
+    approach: 'How does this fit the broader information landscape? What context is missing?',
+  },
+  'DeepSeek': {
+    icon: '⊕',
+    color: '#8A4A3A',
+    weights: 'Consensus · Source Quality',
+    approach: 'Different training environment. Its divergence on geopolitical topics is itself a signal worth noting.',
+  },
+};
+
 // DARK MODE
 const toggle = document.getElementById('theme-toggle');
 const html = document.documentElement;
@@ -1508,22 +1605,159 @@ function closeDrawer() {
 }
 
 async function analyzeArticle(article) {
+  const votumPanel = document.getElementById('votum-panel');
+  const votumLoading = document.getElementById('votum-loading');
+
+  // Show loading state
+  votumLoading.style.display = 'flex';
+  votumPanel.style.display = 'none';
+
+  // Add multi-analysis container if not exists
+  let multiContainer = document.getElementById('multi-analysis-container');
+  if (!multiContainer) {
+    multiContainer = document.createElement('div');
+    multiContainer.id = 'multi-analysis-container';
+    document.getElementById('drawer-body').appendChild(multiContainer);
+  }
+  multiContainer.style.display = 'none';
+
   try {
-    const res = await fetch('/.netlify/functions/analyze', {
+    const res = await fetch('/.netlify/functions/analyze-multi', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: article.title,
         source: article.source,
-        description: article.description || ''
+        description: article.description || '',
       })
     });
-    const analysis = await res.json();
-    renderAnalysis(analysis);
+
+    const data = await res.json();
+    votumLoading.style.display = 'none';
+
+    if (data.models?.length) {
+      multiContainer.style.display = 'block';
+      renderMultiAnalysis(data, multiContainer);
+    } else throw new Error('No models');
+
   } catch(err) {
-    console.error('Analysis error:', err);
-    document.getElementById('votum-loading').style.display = 'none';
+    // Graceful fallback to single Claude analysis
+    try {
+      const res = await fetch('/.netlify/functions/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: article.title,
+          source: article.source,
+          description: article.description || ''
+        })
+      });
+      const analysis = await res.json();
+      votumLoading.style.display = 'none';
+      renderAnalysis(analysis);
+    } catch(e) {
+      votumLoading.style.display = 'none';
+    }
   }
+}
+
+// MULTI-MODEL ANALYSIS RENDERER
+const MODEL_META = {
+  'Claude':   { color:'#3A5A8A', icon:'◈', note:'Weights evidence & constructive value' },
+  'Grok':     { color:'#5A3A8A', icon:'⚡', note:'Weights consistency & framing' },
+  'ChatGPT':  { color:'#3A7A4A', icon:'◯', note:'Weights source quality & consensus' },
+  'Gemini':   { color:'#7A5A2A', icon:'✦', note:'Weights framing & context' },
+  'DeepSeek': { color:'#8A4A3A', icon:'⊕', note:'Different training environment — delta is signal' },
+};
+
+const DIMENSION_LABELS = {
+  consensus:'Consensus', source_quality:'Source Quality',
+  evidence_strength:'Evidence Strength', bias_framing:'Bias & Framing',
+  consistency:'Consistency', constructive_value:'Constructive Value',
+};
+
+function leanColor(lean) {
+  if (!lean) return '#7A7A72';
+  lean = lean.toLowerCase();
+  if (lean.includes('left') && !lean.includes('center')) return '#3A6B9E';
+  if (lean.includes('center-left')) return '#7A9FBF';
+  if (lean.includes('right') && !lean.includes('center')) return '#B94040';
+  if (lean.includes('center-right')) return '#BF9A6A';
+  return '#7A8A6A';
+}
+
+function scoreColor(score) {
+  if (score >= 75) return '#3A7A4A';
+  if (score >= 55) return '#7A8A6A';
+  if (score >= 40) return '#7A5A2A';
+  return '#8A4A3A';
+}
+
+function renderMultiAnalysis(data, container) {
+  const { models, spread, perspective_consensus, dimension_spreads } = data;
+  container.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:0;border-top:0.5px solid var(--border);padding-top:16px;margin-top:8px;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:6px;">Cross-AI Clarity Score</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5;">Five minds. One article. <span style="color:${spread.color};font-style:italic;">${spread.label}</span></div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.55;margin-top:4px;font-style:italic;opacity:0.8;">${spread.desc}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        ${models.map(m => {
+          const meta = MODEL_META[m.model] || { color:'#7A7A72', icon:'·' };
+          return `<div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="font-size:12px;color:${meta.color};">${meta.icon}</span>
+                <span style="font-size:12px;font-weight:500;color:var(--text);">${m.model}</span>
+                <span style="font-size:10px;color:${leanColor(m.lean)};letter-spacing:0.04em;">${m.lean||''}</span>
+              </div>
+              <span style="font-family:'EB Garamond',serif;font-size:18px;color:${scoreColor(m.overall)};">${m.overall}</span>
+            </div>
+            <div style="height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:4px;">
+              <div style="height:100%;width:${m.overall}%;background:${scoreColor(m.overall)};border-radius:2px;"></div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);font-style:italic;line-height:1.4;">${m.reasoning||''}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:10px;">Dimension breakdown</div>
+        ${dimension_spreads.map(d => `
+          <div style="margin-bottom:7px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:11px;color:var(--text);">${DIMENSION_LABELS[d.dimension]||d.dimension}</span>
+                ${d.spread>25?`<span style="font-size:9px;color:${spread.color};">debated</span>`:''}
+              </div>
+              <span style="font-size:11px;color:${scoreColor(d.average)};">${d.average}</span>
+            </div>
+            <div style="height:2px;background:var(--surface2);border-radius:1px;overflow:hidden;">
+              <div style="height:100%;width:${d.average}%;background:${scoreColor(d.average)};border-radius:1px;"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="padding:10px 12px;background:var(--surface2);border-radius:7px;margin-bottom:14px;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:4px;">Perspective consensus</div>
+        <div style="font-size:13px;color:${leanColor(perspective_consensus)};">${perspective_consensus}</div>
+      </div>
+      ${models.some(m=>m.flags?.length)?`
+        <div style="margin-bottom:14px;">
+          <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:8px;">Flags raised</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">
+            ${[...new Set(models.flatMap(m=>m.flags||[]))].map(f=>`<span style="font-size:10px;padding:3px 9px;border-radius:20px;border:0.5px solid var(--border2);color:var(--muted);">${f}</span>`).join('')}
+          </div>
+        </div>
+      `:''}
+      <div style="border-top:0.5px solid var(--border);padding-top:12px;">
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;font-style:italic;">
+          A low score means models debate it — read it the way a judge reads a contested case: with full attention, no predetermined verdict.
+          ${models.some(m=>m.model==='DeepSeek')?'<br><br><span style="opacity:0.7;">⊕ DeepSeek operates under different training conditions. Its divergence on geopolitical topics is itself a signal.</span>':''}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderAnalysis(a) {
@@ -1617,6 +1851,7 @@ async function loadMap() {
 }
 
 loadMap().catch(console.error);
+loadWorthAttention();
 </script>
 <!-- PULSE FOOTER STRIP -->
 <div id="pulse-footer-strip" style="
@@ -1643,7 +1878,7 @@ loadMap().catch(console.error);
       </div>
     </div>
   </div>
-  <div style="font-size:11px;color:var(--muted);opacity:0.5;">votum.ink · votum.world</div>
+  <div style="font-size:11px;color:var(--muted);opacity:0.5;">votum.ink · votum.world · <a href="/privacy.html" style="color:var(--muted);text-decoration:underline;">Privacy</a></div>
 </div>
 
 </body>
