@@ -4,7 +4,7 @@
 const TRANSLATIONS = {
   en: {
     name: "English",
-    flag: "🇬🇧",
+    flag: "🇺🇸",
     dir: "ltr",
     // Header
     wordmarkSub: "ink",
