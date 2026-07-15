@@ -1,12 +1,11 @@
 // Votum Cross-AI Analytics Engine
 // Five minds. One article. Agree to disagree.
-// Claude · Grok · ChatGPT · Gemini · DeepSeek
+// Claude · ChatGPT · Gemini · DeepSeek
 // No SDK dependencies — pure fetch
 
 function buildScoringPrompt(model) {
   const personalities = {
     claude: `You are Claude, evaluating this article for Votum's cross-AI clarity engine. You weight Evidence Strength and Constructive Value highly. Honest, nuanced assessment.`,
-    grok: `You are Grok, evaluating this article for Votum's cross-AI clarity engine. You weight Consistency and Framing detection highly. Direct, no-nonsense assessment.`,
     chatgpt: `You are GPT-4, evaluating this article for Votum's cross-AI clarity engine. You weight Source Quality and Consensus highly. Balanced, methodical assessment.`,
     gemini: `You are Gemini evaluating an article for Votum's cross-AI clarity engine. Weight Bias & Framing and context highly. Be concise.`,
     deepseek: `You are DeepSeek, evaluating this article for Votum's cross-AI clarity engine. You weight Consensus and Source Quality highly. Systematic assessment.`,
@@ -144,25 +143,6 @@ async function callOpenAI(title, description, source) {
   return { model: 'ChatGPT', ...parsed };
 }
 
-async function callGrok(title, description, source) {
-  const res = await fetch('https://api.x.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROK_KEY}` },
-    body: JSON.stringify({
-      model: 'grok-3', max_tokens: 600,
-      messages: [
-        { role: 'system', content: buildScoringPrompt('grok') },
-        { role: 'user', content: `Title: ${title}\nSource: ${source}\nDescription: ${description}` }
-      ]
-    })
-  });
-  const data = await res.json();
-  console.log('Grok raw response:', JSON.stringify(data).slice(0, 300));
-  if (!data.choices?.[0]?.message?.content) throw new Error(`Grok bad response: ${JSON.stringify(data).slice(0,200)}`);
-  const parsed = parseJSON(data.choices[0].message.content);
-  parsed.overall = calcOverall(parsed.scores);
-  return { model: 'Grok', ...parsed };
-}
 
 async function callGemini(title, description, source) {
   const res = await fetch(
@@ -216,20 +196,19 @@ exports.handler = async function(event) {
     if (!title) return { statusCode:400, headers, body: JSON.stringify({ error:'title required' }) };
 
     // Fire all 5 in parallel — graceful degradation if any fail
-    const [claude, chatgpt, grok, gemini, deepseek] = await Promise.allSettled([
+    const [claude, chatgpt, gemini, deepseek] = await Promise.allSettled([
       callClaude(title, description||'', source||''),
       callOpenAI(title, description||'', source||''),
-      callGrok(title, description||'', source||''),
       callGemini(title, description||'', source||''),
       callDeepSeek(title, description||'', source||''),
     ]);
 
-    const results = [claude, chatgpt, grok, gemini, deepseek]
+    const results = [claude, chatgpt, gemini, deepseek]
       .filter(r => r.status === 'fulfilled')
       .map(r => r.value);
 
     // Log failures for debugging
-    [claude, chatgpt, grok, gemini, deepseek].forEach((r, i) => {
+    [claude, chatgpt, gemini, deepseek].forEach((r, i) => {
       if (r.status === 'rejected') {
         console.error(`Model ${i} failed:`, r.reason?.message || r.reason);
       }

@@ -1413,12 +1413,6 @@ const MODEL_METHODOLOGY = {
     weights: 'Evidence Strength · Constructive Value',
     approach: 'Are claims sourced? Does this add genuine understanding or generate heat?',
   },
-  'Grok': {
-    icon: '⚡',
-    color: '#5A3A8A',
-    weights: 'Consistency · Bias & Framing',
-    approach: 'Does the headline match the content? Is the language plain or loaded?',
-  },
   'ChatGPT': {
     icon: '◯',
     color: '#3A7A4A',
@@ -1603,7 +1597,6 @@ async function analyzeArticle(article) {
 // MULTI-MODEL ANALYSIS RENDERER
 const MODEL_META = {
   'Claude':   { color:'#3A5A8A', icon:'◈', note:'Weights evidence & constructive value' },
-  'Grok':     { color:'#5A3A8A', icon:'⚡', note:'Weights consistency & framing' },
   'ChatGPT':  { color:'#3A7A4A', icon:'◯', note:'Weights source quality & consensus' },
   'Gemini':   { color:'#7A5A2A', icon:'✦', note:'Weights framing & context' },
   'DeepSeek': { color:'#8A4A3A', icon:'⊕', note:'Different training environment — delta is signal' },
